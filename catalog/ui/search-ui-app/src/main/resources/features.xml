@@ -18,8 +18,9 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
     <feature name="catalog-ui" version="${project.version}" description="Catalog UI">
-        <feature>spatial-app</feature>
+        <feature">spatial-app</feature>
         <feature>camel-http</feature>
+        <feature>ignite</feature>
         <configfile finalname="${ddf.etc}/org.codice.ddf.catalog.ui.config.config" override="false">
             mvn:ddf.ui/search-ui-app/${project.version}/properties/catalog-ui-config
         </configfile>
