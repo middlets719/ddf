@@ -27,10 +27,11 @@ define([
     'component/property/property',
     'component/singletons/user-instance',
     'component/sort/sort.view',
+    'component/query-schedule/query-schedule.view',
     'js/Common',
     'component/result-form/result-form'
 ], function (Marionette, Backbone, _, $, template, CustomElements, store, DropdownModel,
-             QuerySrcView, PropertyView, Property, user, SortItemCollectionView, Common, ResultForm) {
+            QuerySrcView, PropertyView, Property, user, SortItemView, ScheduleQueryView, Common, ResultForm) {
 
     return Marionette.LayoutView.extend({
         template: template,
@@ -45,7 +46,9 @@ define([
         regions: {
             settingsSortField: '.settings-sorting-field',
             settingsSrc: '.settings-src',
+            settingsSchedule: '.settings-scheduling',
             resultForm: '.result-form'
+
         },
         ui: {},
         focus: function () {
@@ -56,6 +59,8 @@ define([
         },
         onBeforeShow: function () {
             this.setupSortFieldDropdown();
+            this.setupSrcDropdown();
+            this.setupScheduling();
             this.turnOnEditing();
 
             if (ResultForm.getResultTemplatesProperties()) {
@@ -106,14 +111,33 @@ define([
                 }
             });
         },
-        turnOnEditing: function () {
+        turnOnEditing: function(){
             this.$el.addClass('is-editing');
-            this.regionManager.forEach(function (region) {
-                if (region.currentView && region.currentView.turnOnEditing) {
-                    region.currentView.turnOnEditing();
-                }
+            this.regionManager.forEach(function(region){
+                 if (region.currentView && region.currentView.turnOnEditing){
+                     region.currentView.turnOnEditing();
+                 }
             });
             this.focus();
+        },
+        setupScheduling: function() {
+            this.settingsSchedule.show(new ScheduleQueryView({
+                model: new Backbone.Model({
+                    // isScheduleEnabled: this.model.get('isScheduleEnabled'),
+                    // scheduleOptions: {
+                    //     amountValue: this.model.get('scheduleOptions').amountValue,
+                    //     unitValue: this.model.get('scheduleOptions').unitValue,
+                    //     startValue: this.model.get('scheduleOptions').startValue,
+                    //     endValue: this.model.get('scheduleOptions').endValue
+                    // }
+                    isScheduled: (this.model.get('isScheduled') ? 'on' : 'off'),
+                    scheduleAmount: this.model.get('scheduleAmount'),
+                    scheduleUnit: this.model.get('scheduleUnit'),
+                    scheduleStart: this.model.get('scheduleStart'),
+                    scheduleEnd: this.model.get('scheduleEnd')
+                })
+            }));
+            this.settingsSchedule.currentView.turnOffEditing();
         },
         cancel: function () {
             this.$el.removeClass('is-editing');
@@ -130,10 +154,18 @@ define([
                 }
             }
             var sorts = this.settingsSortField.currentView.collection.toJSON();
+            var scheduleConfig = this.settingsSchedule.currentView.getSchedulingConfiguration();
             return {
                 src: src,
                 federation: federation,
-                sorts: sorts
+                sorts: sorts,
+                // isScheduleEnabled: scheduleConfig.isScheduleEnabled,
+                // scheduleOptions: scheduleConfig.scheduleOptions
+                isScheduled: scheduleConfig.isScheduled === 'on',
+                scheduleAmount: scheduleConfig.scheduleAmount,
+                scheduleUnit: scheduleConfig.scheduleUnit,
+                scheduleStart: scheduleConfig.scheduleStart,
+                scheduleEnd: scheduleConfig.scheduleEnd
             };
         },
         saveToModel: function () {

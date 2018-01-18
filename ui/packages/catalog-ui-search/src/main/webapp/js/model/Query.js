@@ -88,6 +88,12 @@ define([
                     type: 'text',
                     isLocal: false,
                     isOutdated: false,
+                    isScheduleEnabled: false,
+                    //scheduleOptions: { amountValue: 1, unitValue: 'weeks', startValue: '', endValue: '' }
+                    scheduleAmount: 1,
+                    scheduleUnit: 'weeks',
+                    scheduleStart: '',
+                    scheduleEnd: '',
                     selectedResultTemplate: undefined
                 }, user.getQuerySettings().toJSON());
             },
