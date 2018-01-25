@@ -21,6 +21,7 @@ define([
     './query-settings.hbs',
     'js/CustomElements',
     'js/store',
+    'js/model/QuerySchedule',
     'component/dropdown/dropdown',
     'component/dropdown/query-src/dropdown.query-src.view',
     'component/property/property.view',
@@ -30,7 +31,7 @@ define([
     'component/query-schedule/query-schedule.view',
     'js/Common',
     'component/result-form/result-form'
-], function (Marionette, Backbone, _, $, template, CustomElements, store, DropdownModel,
+], function (Marionette, Backbone, _, $, template, CustomElements, store, QueryScheduleModel, DropdownModel,
             QuerySrcView, PropertyView, Property, user, SortItemView, ScheduleQueryView, Common, ResultForm) {
 
     return Marionette.LayoutView.extend({
@@ -121,21 +122,13 @@ define([
             this.focus();
         },
         setupScheduling: function() {
+            let userEmail = user.get('user').get('email');
+            let scheduleModel = this.model.get('schedules').get(userEmail);
+            if (scheduleModel === undefined) {
+                scheduleModel = new QueryScheduleModel({ userId: userEmail });
+            }
             this.settingsSchedule.show(new ScheduleQueryView({
-                model: new Backbone.Model({
-                    // isScheduleEnabled: this.model.get('isScheduleEnabled'),
-                    // scheduleOptions: {
-                    //     amountValue: this.model.get('scheduleOptions').amountValue,
-                    //     unitValue: this.model.get('scheduleOptions').unitValue,
-                    //     startValue: this.model.get('scheduleOptions').startValue,
-                    //     endValue: this.model.get('scheduleOptions').endValue
-                    // }
-                    isScheduled: (this.model.get('isScheduled') ? 'on' : 'off'),
-                    scheduleAmount: this.model.get('scheduleAmount'),
-                    scheduleUnit: this.model.get('scheduleUnit'),
-                    scheduleStart: this.model.get('scheduleStart'),
-                    scheduleEnd: this.model.get('scheduleEnd')
-                })
+                model: scheduleModel
             }));
             this.settingsSchedule.currentView.turnOffEditing();
         },
@@ -154,18 +147,13 @@ define([
                 }
             }
             var sorts = this.settingsSortField.currentView.collection.toJSON();
-            var scheduleConfig = this.settingsSchedule.currentView.getSchedulingConfiguration();
+            var scheduleModel = this.settingsSchedule.currentView.getSchedulingConfiguration();
+            this.model.get('schedules').add(scheduleModel, {merge: true});
             return {
                 src: src,
                 federation: federation,
                 sorts: sorts,
-                // isScheduleEnabled: scheduleConfig.isScheduleEnabled,
-                // scheduleOptions: scheduleConfig.scheduleOptions
-                isScheduled: scheduleConfig.isScheduled === 'on',
-                scheduleAmount: scheduleConfig.scheduleAmount,
-                scheduleUnit: scheduleConfig.scheduleUnit,
-                scheduleStart: scheduleConfig.scheduleStart,
-                scheduleEnd: scheduleConfig.scheduleEnd
+                schedules: this.model.get('schedules')
             };
         },
         saveToModel: function () {
