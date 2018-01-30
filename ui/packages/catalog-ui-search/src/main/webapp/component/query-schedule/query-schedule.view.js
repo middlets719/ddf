@@ -25,10 +25,12 @@ define([
     'component/property/property.view',
     'component/property/property',
     'component/dropdown/dropdown.view',
+    'component/radio/radio.view',
+    'component/singletons/user-instance',
     'moment',
     'js/Common'
 ], function(Marionette, Backbone, _, $, template, CustomElements, store, properties, PropertyView, Property,
-    DropdownView, RadioView, Moment, Common) {
+    DropdownView, RadioView, user, Moment, Common) {
 
     function getHumanReadableDuration(milliseconds) {
         var duration = Moment.duration(milliseconds);
@@ -169,7 +171,11 @@ define([
             this.endPicker.currentView.turnOnLimitedWidth();
 
             //let currentDeliveryValues = this.model.get('deliveryIds').map(deliveryId => ({ label: deliveryId, value: deliveryId, class: '' }));
-            let possibleEnumValues = ['myFTP', 'myEmail', 'myPhysicalMailingService'].map(val => ({label: val, value: val, class: ''}));
+            // let possibleEnumValues = ['myFTP', 'myEmail', 'myPhysicalMailingService'].map(val => ({label: val, value: val, class: ''})); 
+            // let possibleEnumValues = {};
+            let possibleEnumValues = user.get('user').getPreferences().get('deliveryMethods').map(val => ({label: val.userSpecifiedName, value: val.userSpecifiedName, class: ''}));
+            
+            // let possibleEnumValues = ['myFTP', 'myEmail', 'myPhysicalMailingService'].map(val => ({label: val, value: val, class: ''}));
             this.deliveryPicker.show(new PropertyView({
                 model: new Property({
                     enumFiltering: false,
