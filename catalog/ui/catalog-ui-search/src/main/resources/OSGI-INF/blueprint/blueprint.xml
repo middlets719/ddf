@@ -96,6 +96,15 @@
 
     <bean id="shareableMetacardPreIngestPlugin"
           class="org.codice.ddf.catalog.ui.security.ShareableMetacardPreIngestPlugin">
+          <argument ref="subjectIdentity"/>
+    </bean>
+
+    <service interface="ddf.catalog.data.MetacardType">
+        <bean class="org.codice.ddf.catalog.ui.scheduling.ScheduleMetacardTypeImpl"/>
+    </service>
+
+    <bean id="workspacePreIngestPlugin"
+          class="org.codice.ddf.catalog.ui.security.WorkspacePreIngestPlugin">
         <argument ref="subjectIdentity"/>
     </bean>
 
@@ -428,6 +437,8 @@
     <bean id="querySchedulingPostIngestPlugin" class="org.codice.ddf.catalog.ui.scheduling.QuerySchedulingPostIngestPlugin">
         <argument ref="catalogFramework"/>
         <argument ref="queryEmailDeliveryService"/>
+        <argument ref="queryFtpDeliveryService"/>
+        <argument ref="persistentStore"/>
         <argument ref="workspaceTransformer"/>
     </bean>
 
