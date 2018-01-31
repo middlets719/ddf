@@ -122,7 +122,7 @@ define([
             this.focus();
         },
         setupScheduling: function() {
-            let username = user.get('user').get('username');
+            let username = user.get('user').get('userid');
             let scheduleModel = this.model.get('schedules').get(username);
             if (scheduleModel === undefined) {
                 scheduleModel = new QueryScheduleModel({ userId: username });
