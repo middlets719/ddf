@@ -14,13 +14,17 @@
 package org.codice.ddf.catalog.ui.forms;
 
 import static java.lang.String.format;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.codice.ddf.catalog.ui.forms.SearchFormsLoader.config;
+import static spark.Spark.delete;
 import static spark.Spark.get;
 
+import com.google.common.collect.ImmutableMap;
 import ddf.catalog.CatalogFramework;
 import ddf.catalog.data.Metacard;
 import ddf.catalog.data.Result;
 import ddf.catalog.operation.impl.CreateRequestImpl;
+import ddf.catalog.operation.impl.DeleteRequestImpl;
 import ddf.security.service.SecurityServiceException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -161,6 +165,16 @@ public class SearchFormsApplication implements SparkApplication {
                     .map(this::toFieldFilter)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList())));
+
+    delete(
+        "/forms/:id",
+        APPLICATION_JSON,
+        (req, res) -> {
+          String id = req.params(":id");
+          catalogFramework.delete(new DeleteRequestImpl(id));
+          return ImmutableMap.of("message", "Successfully deleted.");
+        },
+        util::getJson);
   }
 
   /** Convert a query template metacard into the JSON representation of FormTemplate. */

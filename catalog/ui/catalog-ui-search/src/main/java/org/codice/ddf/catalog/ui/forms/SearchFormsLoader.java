@@ -57,7 +57,7 @@ public class SearchFormsLoader implements Supplier<List<Metacard>> {
           };
 
   private static final File DEFAULT_FORMS_DIRECTORY =
-      new File(new AbsolutePathResolver("etc/forms").getPath());
+      new File(new AbsolutePathResolver("etc" + File.separator + "forms").getPath());
 
   private static final String FORMS_FILE_NAME = "forms.json";
 
