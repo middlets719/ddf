@@ -13,13 +13,13 @@
  *
  **/
  /*global require*/
- var wreqr = require('wreqr');
- var _ = require('underscore');
- var $ = require('jquery');
- var Backbone = require('backbone');
- var SearchForm = require('./search-form');
- var Common = require('js/Common');
- let user = require('component/singletons/user-instance');
+ const wreqr = require('wreqr');
+ const _ = require('underscore');
+ const $ = require('jquery');
+ const Backbone = require('backbone');
+ const SearchForm = require('./search-form');
+ const Common = require('js/Common');
+ const user = require('component/singletons/user-instance');
 
  const fixFilter = function(filter) {
     if (filter.filters) {

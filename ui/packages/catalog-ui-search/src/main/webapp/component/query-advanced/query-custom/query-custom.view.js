@@ -28,8 +28,11 @@ define([
     'component/query-settings/query-settings.view',
     'component/query-advanced/query-advanced.view',
     'component/result-form/result-form'
+    'component/singletons/user-instance',
+    'component/announcement',
+    'component/lightbox/lightbox.view.instance'
 ], function (Marionette, _, $, template, CustomElements, FilterBuilderView, FilterBuilderModel, cql,
-            store, Property, PropertyView, QuerySettingsView, QueryAdvanced, ResultForm) {
+            store, Property, PropertyView, QuerySettingsView, QueryAdvanced, QueryTemplateSharing, user, announcement, lightboxInstance) {
 
     return QueryAdvanced.extend({
         template: template,
@@ -39,6 +42,9 @@ define([
             resultTemplate: '.query-result-template'
         },
         className: 'is-custom',
+        events: {
+            'click .open-sharing': 'handleShare',
+        },
         onBeforeShow: function(){
             this.model = this.model._cloneOf ? store.getQueryById(this.model._cloneOf) : this.model;
             this.querySettings.show(new QuerySettingsView({
@@ -95,6 +101,18 @@ define([
             this.model.set({
                 cql: filter
             });
+        },
+        handleShare: function() {
+            lightboxInstance.model.updateTitle('Query Template Sharing');
+            lightboxInstance.model.open();
+            lightboxInstance.lightboxContent.show(new QueryTemplateSharing({
+                model: this.model,
+                permissions: {
+                    'accessIndividuals': this.model.get('accessIndividuals'),
+                    'accessGroups': this.model.get('accessGroups')
+                },
+                modelId: this.model.get('template').id
+            }));
         }
     });
 });
