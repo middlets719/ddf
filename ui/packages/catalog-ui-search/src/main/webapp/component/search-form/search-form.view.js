@@ -69,11 +69,6 @@
                     template: this.model.toJSON()
                 });
 
-                this.options.queryModel.set({
-                    type: 'custom',
-                    title: this.model.get('name')
-                });
-
                 if (oldType  === 'custom') {
                     this.options.queryModel.trigger('change:type');
                 }

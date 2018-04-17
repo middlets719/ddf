@@ -131,8 +131,10 @@ module.exports =  Marionette.ItemView.extend({
                 permissions: {
                     'accessIndividuals': this.model.get('accessIndividuals'),
                     'accessGroups': this.model.get('accessGroups')
-                }
+                },
+                modelId: this.model.get('id')
             }));
+            this.handleClick();
         },
         handleClick: function() {
             this.$el.trigger('closeDropdown.' + CustomElements.getNamespace());
