@@ -77,7 +77,6 @@ public class TemplateTransformer {
 
     try {
       FilterReader reader = new FilterReader();
-      String metacardOwner = metacard.getAttribute(Core.METACARD_OWNER).getValue().toString();
       JAXBElement<FilterType> root =
           reader.unmarshalFilter(
               new ByteArrayInputStream(wrapped.getFormsFilter().getBytes("UTF-8")));
