@@ -1,4 +1,4 @@
-/**
+ /**
  * Copyright (c) Codice Foundation
  *
  * This is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -45,8 +45,16 @@
     },
     initialize: function(){
         this.listenTo(this.model, 'change:operator', this.updateOperatorDropdown);
+        if (this.options.isForm === true) {
+            if (this.options.isFormBuilder !== true) {
+                this.turnOffFieldAdditions();
+            }
+            this.turnOffNesting();
+            this.turnOffRootOperator();
+        }
     },
     onBeforeShow: function(){
+        this.$el.toggleClass('hide-rearrange', this.options.isSortableDisabled);
         this.filterOperator.show(DropdownView.createSimpleDropdown({
             list: [{
                 label: 'AND',
@@ -66,7 +74,9 @@
         this.listenTo(this.filterOperator.currentView.model, 'change:value', this.handleOperatorUpdate);
         this.filterContents.show(new FilterCollectionView({
             collection: new Backbone.Collection([this.createFilterModel()]),
-                'filter-builder': this
+                'filter-builder': this,
+            isForm: this.options.isForm || false,
+            isFormBuilder: this.options.isFormBuilder || false
         }));
     },
     updateOperatorDropdown: function(){
@@ -165,14 +175,14 @@
                     }
                 }.bind(this));
                 this.handleEditing();
+                // if (this.options.isForm === true && this.options.isFormBuilder !== true) {
+                //     this.filterContents.currentView.turnOnFilterInputEditing();
+                // }
             }
         }.bind(this),0);
     },
     revert: function(){
         this.$el.removeClass('is-editing');
-    },
-    turnOnEditing: function(){
-        this.$el.addClass('is-editing');
     },
     serializeData: function(){
         return {
@@ -206,9 +216,24 @@
         this.$el.removeClass('is-editing');
         this.filterOperator.currentView.turnOffEditing();
         this.filterContents.currentView.turnOffEditing();
+        // if (this.options.isForm === true && this.options.isFormBuilder !== true) {
+        //     this.filterContents.currentView.turnOnFilterInputEditing();
+        // }
     },
+    // turnOnFilterInputEditing: function(){
+    //     this.filterContents.currentView.turnOnFilterInputEditing();
+    // },
+    // turnOffFilterInputEditing: function() {
+    //     this.filterContents.currentView.turnOffFilterInputEditing();
+    // },
     turnOffNesting: function(){
         this.$el.addClass('hide-nesting');
+    },
+    turnOffRootOperator: function(){
+        this.$el.addClass('hide-root-operator');
+    },
+    turnOffFieldAdditions: function(){
+        this.$el.addClass('hide-field-button');
     },
     createFilterModel: function() {
         return new FilterModel({

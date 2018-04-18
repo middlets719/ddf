@@ -13,15 +13,14 @@
  *
  **/
  /*global require*/
- var wreqr = require('wreqr');
- var _ = require('underscore');
- var $ = require('jquery');
- var Backbone = require('backbone');
- var SearchForm = require('./search-form');
- var Common = require('js/Common');
- let user = require('component/singletons/user-instance');
+const _ = require('underscore');
+const $ = require('jquery');
+const Backbone = require('backbone');
+const SearchForm = require('./search-form');
+const Common = require('js/Common');
+const user = require('component/singletons/user-instance');
 
- const fixFilter = function(filter) {
+const fixFilter = function(filter) {
     if (filter.filters) {
         filter.filters.forEach(fixFilter);
     } else {
@@ -30,34 +29,60 @@
     }
  }
 
- const fixTemplates = function(templates) {
+const fixTemplates = function(templates) {
     templates.forEach((template) => {
         return fixFilter(template.filterTemplate);
     });
  };
- 
- let systemTemplates = [];
- let templatePromise = $.ajax({
-    type: 'GET',
-    context: this,
-    url: '/search/catalog/internal/forms/query',
-    contentType: 'application/json',
-    success: function (data) {
-        fixTemplates(data);
-        systemTemplates = data;
-    }
- });
+
+let cachedTemplates = [];
+let promiseIsResolved = false;
+
+const templatePromiseSupplier = () => $.ajax({
+        type: 'GET',
+        context: this,
+        url: '/search/catalog/internal/forms/query',
+        contentType: 'application/json',
+        success: function(data) {
+            fixTemplates(data);
+            //Find templates with the same id but different property maps (because we should trust the server)
+            let updatedTemplates = data.filter(
+                incomingTemplate => _.any(cachedTemplates, (cachedTemplate) => cachedTemplate.id === incomingTemplate.id && !_.isEqual(cachedTemplate, incomingTemplate))
+            );
+            //Find templates that are new
+            let newTemplates = data.filter(
+                incomingTemplate => cachedTemplates.length === 0 || !_.any(cachedTemplates, (cachedTemplate) => cachedTemplate.id === incomingTemplate.id)
+            );
+            //Replace updated templates in their corresponding indices (//TODO: Should this just be a backbone collection instead of an array?)
+            _.each(updatedTemplates, 
+                updatedTemplate => cachedTemplates[_.findIndex(cachedTemplates, (cachedTemplate) => cachedTemplate.id === updatedTemplate.id)] = updatedTemplate
+            );
+            cachedTemplates = cachedTemplates.concat(newTemplates);
+            promiseIsResolved = true;
+        }
+    });
+
+let bootstrapPromise = templatePromiseSupplier();
 
 module.exports = Backbone.AssociatedModel.extend({
     defaults: {
         doneLoading: false,
-        searchForms: []
+        searchForms: [
+            new SearchForm({type: 'new-form'}), 
+            new SearchForm({type: 'basic'}), 
+            new SearchForm({type: 'text'})
+        ]
     },
     initialize: function () {
-        this.addSearchForm(new SearchForm({type: 'basic'}));
-        this.addSearchForm(new SearchForm({type: 'text'}));
-        this.addCustomForms();
-        wreqr.vent.on('deleteTemplateById', this.deleteTemplateById);
+        if (promiseIsResolved === true) {
+            this.addCustomForms();
+            promiseIsResolved = false;
+            bootstrapPromise = new templatePromiseSupplier();
+        }
+        bootstrapPromise.then(() => {
+            this.addCustomForms()
+            this.doneLoading();
+        });
     },
     relations: [{
         type: Backbone.Many,
@@ -70,34 +95,31 @@ module.exports = Backbone.AssociatedModel.extend({
         })
     }],
     addCustomForms: function() {
-        templatePromise.then(() => {
-            if (!this.isDestroyed) {
-                $.each(systemTemplates, (index, value) => {
-                    if (this.checkIfOwnerOrSystem(value)) {
-                        var utcSeconds = value.created / 1000;
-                        var d = new Date(0);
-                        d.setUTCSeconds(utcSeconds);
-                        this.addSearchForm(new SearchForm({
-                            createdOn: Common.getHumanReadableDate(d),
-                            id: value.id,
-                            name: value.title,
-                            type: 'custom',
-                            filterTemplate: value.filterTemplate,
-                            accessIndividuals: value.accessIndividuals,
-                            accessGroups: value.accessGroups,
-                            createdBy: value.creator
-                        }));
-                    }
-                });
-                this.doneLoading();
-            }
-        });
+        if (!this.isDestroyed) {
+            $.each(cachedTemplates, function(index, value) {
+                if (this.checkIfOwnerOrSystem(value)) {
+                    var utcSeconds = value.created / 1000;
+                    var d = new Date(0);
+                    d.setUTCSeconds(utcSeconds);
+                    this.addSearchForm(new SearchForm({
+                        createdOn: Common.getHumanReadableDate(d),
+                        id: value.id,
+                        name: value.title,
+                        type: 'custom',
+                        filterTemplate: JSON.stringify(value.filterTemplate),
+                        accessIndividuals: value.accessIndividuals,
+                        accessGroups: value.accessGroups,
+                        createdBy: value.creator
+                    }));
+                }
+            }.bind(this));
+        }
     },
     getCollection: function() {
         return this.get('searchForms');
     },
     addSearchForm: function(searchForm) {
-        this.get('searchForms').add(searchForm);
+        this.get('searchForms').add(searchForm, {merge: true});
     },
     getDoneLoading: function() {
         return this.get('doneLoading');
@@ -110,9 +132,9 @@ module.exports = Backbone.AssociatedModel.extend({
     doneLoading: function() {
         this.set('doneLoading', true);
     },
-    deleteTemplateById: function(id) {
-        systemTemplates = _.filter(systemTemplates, function(template) {
+    deleteCachedTemplateById: function(id) {
+        cachedTemplates = _.filter(cachedTemplates, function(template) {
             return template.id !== id
-       });
+        });
     }
  });

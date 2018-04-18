@@ -71,6 +71,7 @@ define([
         modelEvents: {
         },
         regions: {
+            filterRearrange: '.filter-rearrange',
             filterAttribute: '.filter-attribute',
             filterComparator: '.filter-comparator',
             filterInput: '.filter-input'
@@ -82,6 +83,7 @@ define([
             this.listenTo(this.model, 'change:comparator', this.determineInput);
         },
         onBeforeShow: function(){
+            this.$el.toggleClass('hide-rearrange', this.options.isSortableDisabled || false);
             this._filterDropdownModel = new DropdownModel({value: 'CONTAINS'});
             this.filterAttribute.show(DropdownView.createSimpleDropdown({
                 list: metacardDefinitions.sortedMetacardTypes.filter(function(metacardType){
@@ -119,10 +121,14 @@ define([
                 case 'DWITHIN':
                     break;
                 default:
-                   if (value[0].constructor === Object) {
+                    if (value === null || value[0] === null) {
+                        value = [""];
+                        break;
+                    }
+                    if (value[0].constructor === Object) {
                         value[0] = value[0].value;
-                   }
-                   break;
+                    }
+                    break;
             }
             return value;
         },
@@ -318,7 +324,7 @@ define([
             var property = this.filterInput.currentView.model instanceof ValueModel
                 ? this.filterInput.currentView.model.get('property')
                 : this.filterInput.currentView.model;
-            property.set('isEditing', false);
+            property.set('isEditing', this.options.isForm === true || this.options.isFormBuilder === true);
         }
     });
 });

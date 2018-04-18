@@ -40,7 +40,9 @@
                         value:resultForm.title,
                         id: resultForm.id,
                         descriptors: resultForm.descriptors,
-                        description: resultForm.description
+                        description: resultForm.description,
+                        created: resultForm.created,
+                        creator: resultForm.creator
                       };
                   });
 
@@ -57,6 +59,10 @@
       },
       getResultTemplatesProperties: function() {
           return resultTemplateProperties;
-      }
-    }))();
+      },
+      deleteResultTemplateById: function(id) {
+        resultTemplateProperties = _.filter(resultTemplateProperties, function(template) {
+            return template.id !== id
+     })}
+    }));
 });

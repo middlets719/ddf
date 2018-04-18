@@ -22,6 +22,7 @@ var lightboxInstance = require('component/lightbox/lightbox.view.instance');
 var SearchSettingsDropdownView = require('component/dropdown/search-settings/dropdown.search-settings.view');
 var DropdownModel = require('component/dropdown/dropdown');
 var SearchFormSelectorDropdownView = require('component/dropdown/search-form-selector/dropdown.search-form-selector.view');
+var ResultFormSelectorDropdownView = require('component/dropdown/result-form-selector/dropdown.result-form-selector.view');
 var _merge = require('lodash/merge');
 var ConfirmationView = require('component/confirmation/confirmation.view');
 var user = require('component/singletons/user-instance');
@@ -32,18 +33,28 @@ module.exports = Marionette.LayoutView.extend({
     className: 'composed-menu',
     regions: {
         searchType: '.interaction-type',
+        resultType: '.interaction-result-type',
         searchAdvanced: '.interaction-type-advanced',
         searchSettings: '.interaction-settings'
     },
     events: {
         'click > .interaction-reset': 'triggerReset',
-        'click > .interaction-type-advanced': 'triggerTypeAdvanced',
-        'click > .interaction-form': 'triggerCloseDropdown'
+        'click > .interaction-type-advanced': 'triggerTypeAdvanced'
     },
     onRender: function(){
         this.listenTo(this.model, 'change:type', this.triggerCloseDropdown);
         this.generateSearchFormSelector();
+        this.generateResultFormSelector();
         this.generateSearchSettings();
+    },
+    generateResultFormSelector: function() {
+        this.resultType.show(new ResultFormSelectorDropdownView({
+            model: new DropdownModel(),
+            modelForComponent: this.model,
+            selectionInterface: this.options.selectionInterface
+        }), {
+            replaceElement: true
+        });
     },
     generateSearchFormSelector: function() {
         this.searchType.show(new SearchFormSelectorDropdownView({
@@ -85,5 +96,6 @@ module.exports = Marionette.LayoutView.extend({
         this.model.set('type', 'advanced');
         user.getQuerySettings().set('type', 'advanced');
         user.savePreferences();
+        this.triggerCloseDropdown();
     }
 });

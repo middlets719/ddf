@@ -350,14 +350,22 @@
         <argument ref="subjectIdentity"/>
     </bean>
 
+    <bean id="filterWriter"
+          class="org.codice.ddf.catalog.ui.forms.filter.FilterWriter">
+        <argument value="true"/>
+    </bean>
+
     <bean id="templateTransformer"
-          class="org.codice.ddf.catalog.ui.forms.model.TemplateTransformer"/>
+          class="org.codice.ddf.catalog.ui.forms.model.TemplateTransformer">
+        <argument ref="filterWriter"/>
+    </bean>
 
     <bean id="searchFormsApplication" class="org.codice.ddf.catalog.ui.forms.SearchFormsApplication"
           init-method="setup">
         <argument ref="catalogFramework"/>
         <argument ref="templateTransformer"/>
         <argument ref="endpointUtil"/>
+        <argument ref="subjectIdentity"/>
     </bean>
 
     <bean id="rootReqSupplier" class="org.codice.ddf.catalog.ui.RootContextRequestSupplier"/>
