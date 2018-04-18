@@ -23,6 +23,7 @@
   let resultTemplateProperties = [];
   let resultTemplatePromise = $.ajax({
      type: 'GET',
+     context: this,
      url: '/search/catalog/internal/forms/result',
      contentType: 'application/json',
      success: function (data) {

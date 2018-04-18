@@ -23,18 +23,20 @@ define([
     'component/filter-builder/filter-builder',
     'js/cql',
     'js/store',
+    'component/property/property',
+    'component/property/property.view',
     'component/query-settings/query-settings.view',
     'component/query-advanced/query-advanced.view',
-    'component/singletons/user-instance',
-    'component/announcement'
+    'component/result-form/result-form'
 ], function (Marionette, _, $, template, CustomElements, FilterBuilderView, FilterBuilderModel, cql,
-            store, QuerySettingsView, QueryAdvanced) {
+            store, Property, PropertyView, QuerySettingsView, QueryAdvanced, ResultForm) {
 
     return QueryAdvanced.extend({
         template: template,
         regions: {
             querySettings: '.query-settings',
             queryAdvanced: '.query-advanced',
+            resultTemplate: '.query-result-template'
         },
         className: 'is-custom',
         onBeforeShow: function(){
@@ -52,9 +54,31 @@ define([
                 this.queryAdvanced.currentView.deserialize(cql.simplify(cql.read(this.model.get('cql'))));
             }
 
+            if (ResultForm.getResultTemplatesProperties()) {
+                var detailLevelProperty = new Property({
+                    label: 'Detail Level',
+                    enum: ResultForm.getResultTemplatesProperties(),
+                    id: 'Detail Level'
+                });
+
+                this.listenTo(detailLevelProperty, 'change:value', this.handleChangeDetailLevel);
+                this.resultTemplate.show(new PropertyView({
+                    model: detailLevelProperty
+                }));
+
+                this.resultTemplate.currentView.turnOnLimitedWidth();
+                this.resultTemplate.currentView.turnOnEditing();
+            }
             this.querySettings.currentView.turnOffEditing();
             this.queryAdvanced.currentView.turnOffEditing();
             this.edit();
+        },
+        handleChangeDetailLevel: function(model, values) {
+            $.each(model.get('enum') , (function(index, value) {
+                if (values[0] === value.value) {
+                    this.model.set('selectedResultTemplate', value);
+                }
+            }).bind(this));
         },
         edit: function(){
             this.$el.addClass('is-editing');
