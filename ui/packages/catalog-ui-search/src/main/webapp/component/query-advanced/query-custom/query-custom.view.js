@@ -27,7 +27,7 @@ define([
     'component/property/property.view',
     'component/query-settings/query-settings.view',
     'component/query-advanced/query-advanced.view',
-    'component/result-form/result-form'
+    'component/result-form/result-form',
     'component/singletons/user-instance',
     'component/announcement',
     'component/lightbox/lightbox.view.instance'
