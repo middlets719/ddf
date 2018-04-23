@@ -35,7 +35,7 @@
         if (this.model.get('type') === 'basic' || this.model.get('type') === 'text') {
             this.$el.addClass('is-static');
         }
-        else{
+        else if (this.model.get('type') === 'custom' || this.model.get('type') === 'result' && this.model.get('createdOn') !== ""){
         this.workspaceActions.show(new SearchFormInteractionsDropdownView({
             model: new DropdownModel(),
             modelForComponent: this.model,
@@ -55,6 +55,20 @@
                 this.options.queryModel.set('type', 'text');
                 user.getQuerySettings().set('type', 'text');
                 break;
+            case 'result':
+                this.options.queryModel.set({
+                    type: 'result',
+                    title: this.model.get('name'),
+                    modelId: this.model.get('id'),
+                    accessGroups: this.model.get('accessGroups'),
+                    accessIndividuals: this.model.get('accessIndividuals'),
+                    descriptors: this.model.get('descriptors')
+                });
+                user.getQuerySettings().set({
+                    type: 'result',
+                    template: this.model.toJSON()
+                });
+                break;              
             case 'custom':
                 var oldType = this.options.queryModel.get('type');
                 this.options.queryModel.set({

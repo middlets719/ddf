@@ -17,6 +17,7 @@ var Marionette = require('marionette');
 var template = require('./query-add.hbs');
 var CustomElements = require('js/CustomElements');
 var QueryBasic = require('component/query-basic/query-basic.view');
+var QueryResult = require('component/query-basic/query-result/query-result.view');
 var QueryCustom = require('component/query-advanced/query-custom/query-custom.view');
 var QueryAdvanced = require('component/query-advanced/query-advanced.view');
 var QueryTitle = require('component/query-title/query-title.view');
@@ -64,6 +65,9 @@ module.exports = Marionette.LayoutView.extend({
             case 'custom':
                 this.showCustom();
                 break;
+            case 'result':
+                this.showResult();
+                break;
         }
     },
     onBeforeShow: function () {
@@ -82,6 +86,14 @@ module.exports = Marionette.LayoutView.extend({
     },
     showBasic: function () {
         this.queryContent.show(new QueryBasic({
+            model: this.model
+        }));
+    },
+    showResult: function () {
+        this.model.set({
+            title: user.getQuerySettings().get('template').name
+        });
+        this.queryContent.show(new QueryResult({
             model: this.model
         }));
     },

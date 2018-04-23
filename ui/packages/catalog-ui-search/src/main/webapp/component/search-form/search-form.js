@@ -18,6 +18,7 @@
         name: 'A Search Form',
         createdBy: 'admin',
         type: 'custom',
+        descriptors: '{}',
         filterTemplate: '{}',
         accessIndividuals: [],
         accessGroups: []
