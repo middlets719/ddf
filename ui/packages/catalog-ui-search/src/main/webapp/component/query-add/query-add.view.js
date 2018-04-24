@@ -29,6 +29,7 @@ var LoadingView = require('component/loading/loading.view');
 var wreqr = require('wreqr');
 const user = require('component/singletons/user-instance');
 const cql = require('js/cql');
+const  lightboxInstance = require('component/lightbox/lightbox.view.instance');
 
 module.exports = Marionette.LayoutView.extend({
     template: template,
@@ -90,12 +91,26 @@ module.exports = Marionette.LayoutView.extend({
         }));
     },
     showResult: function () {
-        this.model.set({
-            title: user.getQuerySettings().get('template').name
-        });
-        this.queryContent.show(new QueryResult({
+        this.queryContent.show(new QueryAdhoc({
             model: this.model
         }));
+        lightboxInstance.model.updateTitle(user.getQuerySettings().get('template').name);
+        lightboxInstance.model.open();
+        lightboxInstance.lightboxContent.show(new QueryResult({
+                model: this.model,
+                title: user.getQuerySettings().get('template').name,
+                permissions: {
+                    'accessIndividuals': this.model.get('accessIndividuals'),
+                    'accessGroups': this.model.get('accessGroups')
+                },
+                modelId: this.model.get('id')
+            }));
+        // this.model.set({
+        //     title: user.getQuerySettings().get('template').name
+        // });
+        // this.queryContent.show(new QueryResult({
+        //     model: this.model
+        // }));
     },
     handleEditOnShow: function () {
         if (this.$el.hasClass('is-editing')) {

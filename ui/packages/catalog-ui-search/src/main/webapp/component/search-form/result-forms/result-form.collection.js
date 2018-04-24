@@ -19,17 +19,7 @@
  const ResultForm = require('../search-form');
  const Common = require('js/Common');
  const user = require('component/singletons/user-instance');
-
- let resultTemplates = [];
- const templatePromise = $.ajax({
-    type: 'GET',
-    context: this,
-    url: '/search/catalog/internal/forms/result',
-    contentType: 'application/json',
-    success: function (data) {
-        resultTemplates = data;
-    }
-});
+ const Results = require('component/result-form/result-form');
 
  module.exports = Backbone.AssociatedModel.extend({
    model: ResultForm,
@@ -54,26 +44,23 @@
         })
     }],
    addResultForms: function() {
-       templatePromise.then(() => {
-            if (!this.isDestroyed){
-                $.each(resultTemplates, (index, value) => {
-                    let utcSeconds = value.created / 1000;
-                    let d = new Date(0);
-                    d.setUTCSeconds(utcSeconds);
-                    this.addResultForm(new ResultForm({
-                        createdOn: Common.getHumanReadableDate(d),
-                        id: value.id,
-                        name: value.title,
-                        type: 'result',
-                        descriptors: value.descriptors,
-                        accessIndividuals: value.accessIndividuals,
-                        accessGroups: value.accessGroups,
-                        createdBy: value.creator
-                    }));
-                });
-                this.doneLoading();
-            }
-       });
+        if (!this.isDestroyed){
+            Results.getResultTemplatesProperties().forEach(element => {
+                let utcSeconds = element.created / 1000;
+                let d = new Date(0);
+                d.setUTCSeconds(utcSeconds);
+                this.addResultForm(new ResultForm({
+                    createdOn: Common.getHumanReadableDate(d),
+                    id: element.id,
+                    name: element.label,
+                    type: 'result',
+                    descriptors: element.descriptors,
+                    accessIndividuals: element.accessIndividuals,
+                    accessGroups: element.accessGroups,
+                }));
+            });
+            this.doneLoading();
+        };
    },
    checkIfOwnerOrSystem: function(template) {
     let myEmail = user.get('user').get('email');

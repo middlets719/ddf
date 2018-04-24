@@ -22,6 +22,7 @@ const store = require('js/store');
 const PropertyView = require('component/property/property.view');
 const Property = require('component/property/property');
 const metacardDefinitions = require('component/singletons/metacard-definitions');
+const Loading = require('component/loading-companion/loading-companion.view');
 
 
 module.exports = Marionette.LayoutView.extend({
@@ -34,6 +35,7 @@ module.exports = Marionette.LayoutView.extend({
             'click .editor-save': 'save'
         },
         regions: {
+            basicTitle: '.basic-text',
             basicAttribute: '.basic-type',
             basicAttributeSpecific: '.basic-type-specific'
         },
@@ -41,6 +43,7 @@ module.exports = Marionette.LayoutView.extend({
         filter: undefined,
         onBeforeShow: function(){
             this.model = this.model._cloneOf ? store.getQueryById(this.model._cloneOf) : this.model;
+            this.setupTitleInput();
             this.setupAttribute();
             this.setupAttributeSpecific();
             this.listenTo(this.basicAttribute.currentView.model, 'change:value', this.handleAttributeValue);
@@ -49,7 +52,7 @@ module.exports = Marionette.LayoutView.extend({
             this.edit();
         },
         setupAttributeSpecific: function(){
-            var currentValue = [];
+            let currentValue = this.model.get('template').descriptors !== '{}' ? this.model.get('template').descriptors : [];
             this.basicAttributeSpecific.show(new PropertyView({
                 model: new Property({
                     enumFiltering: true,
@@ -68,18 +71,29 @@ module.exports = Marionette.LayoutView.extend({
             }));
         },
         setupAttribute: function () {
-            var currentValue = 'any';
+            //is there a better way to check for this?
+            let currentValue = this.model.get('template').descriptors !== '{}' ? 'specific' : 'any';
             this.basicAttribute.show(new PropertyView({
                 model: new Property({
                     value: [currentValue],
                     id: 'Match Attributes',
                     radio: [{
-                        label: 'Any',
+                        label: 'All',
                         value: 'any'
                     }, {
                         label: 'Specific',
                         value: 'specific'
                     }]
+                })
+            }));
+        },
+        setupTitleInput: function () {
+            let currentValue = this.model.get('template').name ? this.model.get('template').name : '';
+            this.basicTitle.show(new PropertyView({
+                model: new Property({
+                    value: [currentValue],
+                    id: 'Title',
+                    placeholder: 'Result Form Title'
                 })
             }));
         },
@@ -117,27 +131,42 @@ module.exports = Marionette.LayoutView.extend({
             }
         },
         focus: function(){
-            //this.basicText.currentView.focus();
+            this.basicText.currentView.focus();
         },
         cancel: function(){
-            this.$el.removeClass('is-editing');
-            this.onBeforeShow();
+            this.cleanup();
         },
         handleDownConversion: function (downConversion) {
             this.$el.toggleClass('is-down-converted', downConversion);
         },
         save: function () {
-            this.$el.removeClass('is-editing');
-            //this.basicSettings.currentView.saveToModel();
+            let view = this;
+            Loading.beginLoading(view);
+            let descriptors = this.basicAttributeSpecific.currentView.model.get('value'); 
+
+            let templatePerms = {
+                'descriptors': descriptors
+            };
+            this.updateResults(templatePerms);
         },
-        setDefaultTitle: function(){
-            var text = this.basicText.currentView.model.getValue()[0];
-            var title;
-            if (text === "") {
-                title = "Result";
-            } else {
-                title = text;
-            }
-            this.model.set('title', title);
+        updateResults: function(templatePerms) {
+            let resultEndpoint = `/search/catalog/internal/forms/result/${this.options.modelId}`
+            $.ajax({
+                url: resultEndpoint,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                type: 'PUT',
+                data: JSON.stringify(templatePerms),
+                context: this,
+                success: function(data) {
+                    this.message('Success!', 'Saved Result Form', 'success');
+                    this.cleanup();
+                },
+                error: this.cleanup()
+            });
+        },
+        cleanup: function () {
+            this.$el.trigger(CustomElements.getNamespace() + 'close-lightbox');
+            Loading.endLoading(this);
         }
 });

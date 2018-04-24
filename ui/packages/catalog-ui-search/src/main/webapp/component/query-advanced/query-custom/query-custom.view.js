@@ -32,7 +32,7 @@ define([
     'component/announcement',
     'component/lightbox/lightbox.view.instance'
 ], function (Marionette, _, $, template, CustomElements, FilterBuilderView, FilterBuilderModel, cql,
-            store, Property, PropertyView, QuerySettingsView, QueryAdvanced, QueryTemplateSharing, user, announcement, lightboxInstance) {
+            store, Property, PropertyView, QuerySettingsView, QueryAdvanced, ResultForm, user, announcement, lightboxInstance) {
 
     return QueryAdvanced.extend({
         template: template,
@@ -105,7 +105,7 @@ define([
         handleShare: function() {
             lightboxInstance.model.updateTitle('Query Template Sharing');
             lightboxInstance.model.open();
-            lightboxInstance.lightboxContent.show(new QueryTemplateSharing({
+            lightboxInstance.lightboxContent.show(new ResultForm({
                 model: this.model,
                 permissions: {
                     'accessIndividuals': this.model.get('accessIndividuals'),

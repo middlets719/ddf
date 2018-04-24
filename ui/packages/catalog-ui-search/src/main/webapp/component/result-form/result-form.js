@@ -40,7 +40,8 @@
                         value:resultForm.title,
                         id: resultForm.id,
                         descriptors: resultForm.descriptors,
-                        description: resultForm.description
+                        description: resultForm.description,
+                        created: resultForm.created
                       };
                   });
 

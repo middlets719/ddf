@@ -1,4 +1,4 @@
-@{customElementNamespace}query-basic {
+@{customElementNamespace}query-result {
   .customElement;
 
   overflow: hidden;
@@ -15,7 +15,6 @@
     max-height: ~"calc(100% - 2*@{minimumButtonSize})";
     padding: 10px 10px;
 
-    .basic-location-specific,
     .basic-type-specific {
       display: none;
       margin-left: 20px;
@@ -70,7 +69,7 @@
   }
 }
 
-@{customElementNamespace}query-basic.is-location-specific {
+@{customElementNamespace}query-result.is-location-specific {
   .editor-properties {
 
     .basic-location-specific {
@@ -79,7 +78,7 @@
   }
 }
 
-@{customElementNamespace}query-basic.is-type-specific {
+@{customElementNamespace}query-result.is-type-specific {
   .editor-properties {
 
     .basic-type-specific {
@@ -89,7 +88,7 @@
 }
 
  .is-small-screen, .is-mobile-screen {
-  @{customElementNamespace}query-basic {
+  @{customElementNamespace}query-result {
 
   }
 }
