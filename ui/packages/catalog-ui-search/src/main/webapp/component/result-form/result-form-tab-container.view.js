@@ -14,24 +14,21 @@
  **/
  /*global require*/
  const Marionette = require('marionette');
- const _ = require('underscore');
  const $ = require('jquery');
- const SearchFormView = require('../search-form.view');
- const ResultFormCollection = require('./result-form.collection');
+ const template = require('component/search-form/search-form.collection.hbs');
+ const ResultFormCollectionView = require('./result-form.collection.view');
  const CustomElements = require('js/CustomElements');
 
- module.exports = Marionette.CollectionView.extend({
-     childView: SearchFormView,
-     className: 'is-list is-inline has-list-highlighting',
-     initialize: function(options) {
-        let resultFormCollection = new ResultFormCollection();
-        this.collection = resultFormCollection.getCollection();
-        this.resultFormCollection = resultFormCollection;
-        this.options = options;
-     },
-     childViewOptions: function() {
-        return {
-            queryModel: this.options.model
-        };
-     },
+ module.exports = Marionette.LayoutView.extend({
+    template: template,
+    tagName: CustomElements.register('result-form-collection'),
+    regions: {
+        collection: '.collection'
+    },
+    onRender: function () {
+        this.collection.show(new ResultFormCollectionView({
+            model: this.model
+        }));
+        this.$el.find('.loading').hide();
+    }
  });

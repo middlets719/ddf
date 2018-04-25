@@ -17,7 +17,7 @@ var Marionette = require('marionette');
 var template = require('./query-add.hbs');
 var CustomElements = require('js/CustomElements');
 var QueryBasic = require('component/query-basic/query-basic.view');
-var QueryResult = require('component/query-basic/query-result/query-result.view');
+var QueryResult = require('component/result-form/result-form.view');
 var QueryCustom = require('component/query-advanced/query-custom/query-custom.view');
 var QueryAdvanced = require('component/query-advanced/query-advanced.view');
 var QueryTitle = require('component/query-title/query-title.view');
@@ -66,6 +66,7 @@ module.exports = Marionette.LayoutView.extend({
             case 'custom':
                 this.showCustom();
                 break;
+            case 'newResult':
             case 'result':
                 this.showResult();
                 break;
@@ -91,26 +92,16 @@ module.exports = Marionette.LayoutView.extend({
         }));
     },
     showResult: function () {
-        this.queryContent.show(new QueryAdhoc({
-            model: this.model
-        }));
-        lightboxInstance.model.updateTitle(user.getQuerySettings().get('template').name);
+        lightboxInstance.model.updateTitle(this.model.get('title'));
         lightboxInstance.model.open();
         lightboxInstance.lightboxContent.show(new QueryResult({
                 model: this.model,
-                title: user.getQuerySettings().get('template').name,
+                title: this.model.get('title'),
                 permissions: {
                     'accessIndividuals': this.model.get('accessIndividuals'),
                     'accessGroups': this.model.get('accessGroups')
-                },
-                modelId: this.model.get('id')
+                }
             }));
-        // this.model.set({
-        //     title: user.getQuerySettings().get('template').name
-        // });
-        // this.queryContent.show(new QueryResult({
-        //     model: this.model
-        // }));
     },
     handleEditOnShow: function () {
         if (this.$el.hasClass('is-editing')) {

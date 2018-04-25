@@ -16,7 +16,7 @@
  const _ = require('underscore');
  const $ = require('jquery');
  const Backbone = require('backbone');
- const ResultForm = require('../search-form');
+ const ResultForm = require('component/search-form/search-form');
  const Common = require('js/Common');
  const user = require('component/singletons/user-instance');
  const Results = require('component/result-form/result-form');
@@ -29,9 +29,8 @@
    },
    initialize: function() {
         this.addResultForm(new ResultForm({
-            name: 'Create New',
-            type: 'result',
-            createdOn: ""
+            name: 'Create New Result Form',
+            type: 'newResult'
         }));
         this.addResultForms();
    },
@@ -45,7 +44,10 @@
     }],
    addResultForms: function() {
         if (!this.isDestroyed){
-            Results.getResultTemplatesProperties().forEach(element => {
+            let filteredList = Results.getResultTemplatesProperties().filter(function (resultField) {
+                return resultField.id != 'allFields'
+              });
+            filteredList.forEach(element => {
                 let utcSeconds = element.created / 1000;
                 let d = new Date(0);
                 d.setUTCSeconds(utcSeconds);
@@ -57,9 +59,9 @@
                     descriptors: element.descriptors,
                     accessIndividuals: element.accessIndividuals,
                     accessGroups: element.accessGroups,
+                    description: element.description
                 }));
             });
-            this.doneLoading();
         };
    },
    checkIfOwnerOrSystem: function(template) {

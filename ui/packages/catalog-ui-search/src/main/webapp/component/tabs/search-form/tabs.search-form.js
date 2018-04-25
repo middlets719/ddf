@@ -13,7 +13,7 @@
  const Tabs = require('component/tabs/tabs');
  const MySearchFormCollectionView = require('component/search-form/search-form-tab-container.view');
  const MySearchSharingFormCollectionView = require('component/search-form/forms-sharing/search-form-sharing-tab-container.view');
- const ResultFormCollectionView = require('component/search-form/result-forms/result-form-tab-container.view');
+ const ResultFormCollectionView = require('component/result-form/result-form-tab-container.view');
 
  module.exports = Tabs.extend({
     defaults: {

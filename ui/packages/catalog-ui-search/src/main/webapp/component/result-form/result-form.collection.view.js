@@ -14,27 +14,25 @@
  **/
  /*global require*/
  const Marionette = require('marionette');
+ const _ = require('underscore');
  const $ = require('jquery');
- const template = require('../search-form.collection.hbs');
- const ResultFormCollectionView = require('./result-form.collection.view');
+ const SearchFormView = require('component/search-form/search-form.view');
+ const ResultFormCollection = require('./result-form.collection');
  const CustomElements = require('js/CustomElements');
 
- module.exports = Marionette.LayoutView.extend({
-    template: template,
-    tagName: CustomElements.register('result-form-collection'),
-    regions: {
-        collection: '.collection'
-    },
-    onRender: function () {
-        this.collection.show(new ResultFormCollectionView({
-            model: this.model
-        }));
-        this.$el.find('.loading').show();
-        this.listenTo(this.collection.currentView.resultFormCollection, "change:doneLoading", this.showCollection);
-    },
-    showCollection: function() {
-        if(this.collection.currentView.resultFormCollection.getDoneLoading()) {
-            this.$el.find('.loading').hide();
-        }
-    }
+ module.exports = Marionette.CollectionView.extend({
+     childView: SearchFormView,
+     className: 'is-list is-inline has-list-highlighting',
+     tagName: CustomElements.register('result-forms'),
+     initialize: function(options) {
+        let resultFormCollection = new ResultFormCollection();
+        this.collection = resultFormCollection.getCollection();
+        this.resultFormCollection = resultFormCollection;
+        this.options = options;
+     },
+     childViewOptions: function() {
+        return {
+            queryModel: this.options.model
+        };
+     },
  });

@@ -16,7 +16,7 @@
 const Marionette = require('marionette');
 const _ = require('underscore');
 const $ = require('jquery');
-const template = require('./query-result.hbs');
+const template = require('./result-form.hbs');
 const CustomElements = require('js/CustomElements');
 const store = require('js/store');
 const PropertyView = require('component/property/property.view');
@@ -24,10 +24,9 @@ const Property = require('component/property/property');
 const metacardDefinitions = require('component/singletons/metacard-definitions');
 const Loading = require('component/loading-companion/loading-companion.view');
 
-
 module.exports = Marionette.LayoutView.extend({
         template: template,
-        tagName: CustomElements.register('query-result'),
+        tagName: CustomElements.register('result-form'),
         modelEvents: {},
         events: {
             'click .editor-edit': 'edit',
@@ -36,6 +35,7 @@ module.exports = Marionette.LayoutView.extend({
         },
         regions: {
             basicTitle: '.basic-text',
+            basicDescription: '.basic-description',
             basicAttribute: '.basic-type',
             basicAttributeSpecific: '.basic-type-specific'
         },
@@ -44,15 +44,13 @@ module.exports = Marionette.LayoutView.extend({
         onBeforeShow: function(){
             this.model = this.model._cloneOf ? store.getQueryById(this.model._cloneOf) : this.model;
             this.setupTitleInput();
-            this.setupAttribute();
+            this.setupDescription();
             this.setupAttributeSpecific();
-            this.listenTo(this.basicAttribute.currentView.model, 'change:value', this.handleAttributeValue);
-            this.handleAttributeValue();
             this.turnOnLimitedWidth();
             this.edit();
         },
         setupAttributeSpecific: function(){
-            let currentValue = this.model.get('template').descriptors !== '{}' ? this.model.get('template').descriptors : [];
+            let currentValue = this.model.get('descriptors') !== '{}' ? this.model.get('descriptors') : [];
             this.basicAttributeSpecific.show(new PropertyView({
                 model: new Property({
                     enumFiltering: true,
@@ -70,25 +68,8 @@ module.exports = Marionette.LayoutView.extend({
                 })
             }));
         },
-        setupAttribute: function () {
-            //is there a better way to check for this?
-            let currentValue = this.model.get('template').descriptors !== '{}' ? 'specific' : 'any';
-            this.basicAttribute.show(new PropertyView({
-                model: new Property({
-                    value: [currentValue],
-                    id: 'Match Attributes',
-                    radio: [{
-                        label: 'All',
-                        value: 'any'
-                    }, {
-                        label: 'Specific',
-                        value: 'specific'
-                    }]
-                })
-            }));
-        },
         setupTitleInput: function () {
-            let currentValue = this.model.get('template').name ? this.model.get('template').name : '';
+            let currentValue = this.model.get('title') ? this.model.get('title') : '';
             this.basicTitle.show(new PropertyView({
                 model: new Property({
                     value: [currentValue],
@@ -97,9 +78,17 @@ module.exports = Marionette.LayoutView.extend({
                 })
             }));
         },
+        setupDescription: function () {
+            let currentValue = this.model.get('description') ? this.model.get('description') : '';
+            this.basicDescription.show(new PropertyView({
+                model: new Property({
+                    value: [currentValue],
+                    id: 'Description',
+                    placeholder: 'Result Form Description'
+                })
+            }));
+        },
         handleAttributeValue: function () {
-            var attribute = this.basicAttribute.currentView.model.getValue()[0];
-            this.$el.toggleClass('is-type-any', attribute === 'any');
             this.$el.toggleClass('is-type-specific', attribute === 'specific');
         },
         turnOnLimitedWidth: function () {
@@ -123,29 +112,20 @@ module.exports = Marionette.LayoutView.extend({
                     region.currentView.turnOnEditing();
                 }
             });
-            var tabbable = _.filter(this.$el.find('[tabindex], input, button'), function (element) {
-                return element.offsetParent !== null;
-            });
-            if (tabbable.length > 0) {
-                $(tabbable[0]).focus();
-            }
-        },
-        focus: function(){
-            this.basicText.currentView.focus();
         },
         cancel: function(){
             this.cleanup();
-        },
-        handleDownConversion: function (downConversion) {
-            this.$el.toggleClass('is-down-converted', downConversion);
         },
         save: function () {
             let view = this;
             Loading.beginLoading(view);
             let descriptors = this.basicAttributeSpecific.currentView.model.get('value'); 
-
+            let title = this.basicTitle.currentView.model.getValue()[0];
+            let description = this.basicDescription.currentView.model.getValue()[0];
             let templatePerms = {
-                'descriptors': descriptors
+                'descriptors': descriptors,
+                'title' : title,
+                'description': description
             };
             this.updateResults(templatePerms);
         },

@@ -1,4 +1,4 @@
-@{customElementNamespace}query-result {
+@{customElementNamespace}result-form {
   .customElement;
 
   overflow: hidden;
@@ -15,10 +15,6 @@
     max-height: ~"calc(100% - 2*@{minimumButtonSize})";
     padding: 10px 10px;
 
-    .basic-type-specific {
-      display: none;
-      margin-left: 20px;
-    }
   }
 
   .editor-footer {
@@ -57,28 +53,8 @@
       }
     }
   }
-
-  @{customElementNamespace}query-settings {
-    .editor-properties {
-      padding: 0px;
-      max-height: none;
-    }
-    .editor-footer {
-      display: none;
-    }
-  }
 }
-
-@{customElementNamespace}query-result.is-location-specific {
-  .editor-properties {
-
-    .basic-location-specific {
-      display: block;
-    }
-  }
-}
-
-@{customElementNamespace}query-result.is-type-specific {
+@{customElementNamespace}result-form.is-type-specific {
   .editor-properties {
 
     .basic-type-specific {
@@ -86,9 +62,8 @@
     }
   }
 }
-
  .is-small-screen, .is-mobile-screen {
-  @{customElementNamespace}query-result {
+  @{customElementNamespace}result-form {
 
   }
 }

@@ -32,10 +32,10 @@
         workspaceActions: '.choice-actions'
     },
     onRender: function() {
-        if (this.model.get('type') === 'basic' || this.model.get('type') === 'text') {
+        if (this.model.get('type') === 'basic' || this.model.get('type') === 'text'|| this.model.get('type') === 'newResult') {
             this.$el.addClass('is-static');
         }
-        else if (this.model.get('type') === 'custom' || this.model.get('type') === 'result' && this.model.get('createdOn') !== ""){
+        else if (this.model.get('type') === 'custom' || this.model.get('type') === 'result' ){
         this.workspaceActions.show(new SearchFormInteractionsDropdownView({
             model: new DropdownModel(),
             modelForComponent: this.model,
@@ -46,6 +46,7 @@
         }
     },
     changeView: function() {
+        let oldType;
         switch(this.model.get('type')) {
             case 'basic':
                 this.options.queryModel.set('type', 'basic');
@@ -55,22 +56,38 @@
                 this.options.queryModel.set('type', 'text');
                 user.getQuerySettings().set('type', 'text');
                 break;
+            case 'newResult':
+                oldType = this.options.queryModel.get('type');
+                this.options.queryModel.set({
+                    type: 'newResult',
+                    title: "",
+                    modelId: "",
+                    accessGroups: [],
+                    accessIndividuals: [],
+                    descriptors: [],
+                    description: ""
+                });
+                if (oldType  === 'newResult') {
+                    this.options.queryModel.trigger('change:type');
+                }
+                break;              
             case 'result':
+                oldType = this.options.queryModel.get('type');
                 this.options.queryModel.set({
                     type: 'result',
                     title: this.model.get('name'),
                     modelId: this.model.get('id'),
                     accessGroups: this.model.get('accessGroups'),
                     accessIndividuals: this.model.get('accessIndividuals'),
-                    descriptors: this.model.get('descriptors')
+                    descriptors: this.model.get('descriptors'),
+                    description: this.model.get('description')
                 });
-                user.getQuerySettings().set({
-                    type: 'result',
-                    template: this.model.toJSON()
-                });
+                if (oldType  === 'result') {
+                    this.options.queryModel.trigger('change:type');
+                }
                 break;              
             case 'custom':
-                var oldType = this.options.queryModel.get('type');
+                oldType = this.options.queryModel.get('type');
                 this.options.queryModel.set({
                     type: 'custom',
                     title: this.model.get('name'),

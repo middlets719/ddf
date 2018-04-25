@@ -41,7 +41,9 @@
                         id: resultForm.id,
                         descriptors: resultForm.descriptors,
                         description: resultForm.description,
-                        created: resultForm.created
+                        created: resultForm.created,
+                        creator: resultForm.creator
+
                       };
                   });
 
