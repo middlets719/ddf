@@ -32,7 +32,7 @@ define([
     'js/Common',
     'component/result-form/result-form'
 ], function (Marionette, Backbone, _, $, template, CustomElements, store, QueryScheduleModel, DropdownModel,
-            QuerySrcView, PropertyView, Property, user, SortItemView, ScheduleQueryView, Common, ResultForm) {
+            QuerySrcView, PropertyView, Property, user, SortItemCollectionView, ScheduleQueryView, Common, ResultForm) {
 
     return Marionette.LayoutView.extend({
         template: template,
