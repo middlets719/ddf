@@ -39,8 +39,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codice.ddf.catalog.ui.scheduling.ScheduleMetacardImpl;
 import org.boon.core.value.ValueMap;
+import org.codice.ddf.catalog.ui.scheduling.ScheduleMetacardImpl;
 import org.codice.ddf.catalog.ui.util.EndpointUtil;
 
 public class WorkspaceTransformer {

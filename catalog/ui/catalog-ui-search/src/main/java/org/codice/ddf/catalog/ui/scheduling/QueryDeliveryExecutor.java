@@ -127,12 +127,7 @@ final class QueryDeliveryExecutor implements Runnable {
           "There was a problem reading the given query expression: " + exception.getMessage());
     }
 
-    final SortBy sortBy =
-        queryMetacardData
-                .getOrDefault(QueryMetacardTypeImpl.QUERY_SORT_ORDER, "ascending")
-                .equals("ascending")
-            ? SortBy.NATURAL_ORDER
-            : SortBy.REVERSE_ORDER;
+    final SortBy sortBy = SortBy.NATURAL_ORDER;
     final List<String> sources =
         (List<String>) queryMetacardData.getOrDefault("src", new ArrayList<>());
 

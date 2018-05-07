@@ -103,11 +103,6 @@
         <bean class="org.codice.ddf.catalog.ui.scheduling.ScheduleMetacardTypeImpl"/>
     </service>
 
-    <bean id="workspacePreIngestPlugin"
-          class="org.codice.ddf.catalog.ui.security.WorkspacePreIngestPlugin">
-        <argument ref="subjectIdentity"/>
-    </bean>
-
     <bean id="noteMetacardType" class="org.codice.ddf.catalog.ui.metacard.notes.NoteMetacardType"/>
 
     <service ref="noteMetacardType" interface="ddf.catalog.data.MetacardType">
