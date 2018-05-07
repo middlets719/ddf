@@ -18,6 +18,7 @@ define([
         'js/cql',
         'js/model/QueryResponse',
         'js/model/ResultSort',
+        'js/model/QuerySchedule',
         'component/singletons/sources-instance',
         'js/Common',
         'js/CacheSourceSelector',
@@ -27,8 +28,8 @@ define([
         'lodash/merge',
         'backbone-associations',
     ],
-    function (Backbone, _, properties, cql, QueryResponse, ResultSort, Sources, Common, CacheSourceSelector, announcement,
-              CQLUtils, user, _merge) {
+    function (Backbone, _, properties, cql, QueryResponse, ResultSort, QuerySchedule, Sources, Common, CacheSourceSelector, announcement,
+        CQLUtils, user, _merge) {
         "use strict";
         var Query = {};
 
@@ -66,6 +67,10 @@ define([
                 key: 'result',
                 relatedModel: QueryResponse,
                 isTransient: true
+            }, {
+                type: Backbone.Many,
+                key: 'schedules',
+                relatedModel: QuerySchedule
             }],
             //in the search we are checking for whether or not the model
             //only contains 5 items to know if we can search or not
@@ -88,6 +93,7 @@ define([
                     type: 'text',
                     isLocal: false,
                     isOutdated: false,
+                    schedules: [],
                     selectedResultTemplate: undefined
                 }, user.getQuerySettings().toJSON());
             },
@@ -111,6 +117,7 @@ define([
                 this.set('id', this.getId());
                 this.listenTo(user.get('user>preferences'), 'change:resultCount', this.handleChangeResultCount);
                 this.listenTo(this, 'change:cql', () => this.set('isOutdated', true));
+                this.listenTo(this.get('schedules'), 'change add remove update', this.handleSchedulesChange);
             },
             buildSearchData: function () {
                 var data = this.toJSON();
@@ -335,6 +342,9 @@ define([
                 if (this.get('result')) {
                     this.get('result').resetResultCountsBySource();
                 }
+            },
+            handleSchedulesChange: function() {
+                this.trigger('update');
             },
             getResultsRangeLabel: function (resultsCollection) {
                 var results = resultsCollection.fullCollection.length;
