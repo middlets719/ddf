@@ -118,10 +118,12 @@ module.exports = Marionette.LayoutView.extend({
     let descriptors = this.basicAttributeSpecific.currentView.model.get('value')
     let title = this.basicTitle.currentView.model.getValue()[0]
     let description = this.basicDescription.currentView.model.getValue()[0]
+    let id = this.model.get('formId')
     let templatePerms = {
       'descriptors': descriptors.flatten(),
       'title': title,
-      'description': description
+      'description': description,
+      'id' : id
     }
     this.updateResults(templatePerms)
   },

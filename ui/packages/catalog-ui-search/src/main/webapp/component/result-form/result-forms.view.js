@@ -26,7 +26,7 @@ module.exports = SearchFormViews.extend({
         this.options.queryModel.set({
           type: 'newResult',
           title: '',
-          modelId: '',
+          formId: this.model.get('id'),
           accessGroups: [],
           accessIndividuals: [],
           descriptors: [],
@@ -37,7 +37,7 @@ module.exports = SearchFormViews.extend({
         this.options.queryModel.set({
           type: 'result',
           title: this.model.get('name'),
-          modelId: this.model.get('id'),
+          formId: this.model.get('id'),
           accessGroups: this.model.get('accessGroups'),
           accessIndividuals: this.model.get('accessIndividuals'),
           descriptors: this.model.get('descriptors'),
