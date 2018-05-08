@@ -68,6 +68,7 @@ define([
                 let detailLevelProperty = new Property({
                     label: 'Detail Level',
                     enum: ResultForm.getResultTemplatesProperties(),
+                    showValidationIssues: false,
                     id: 'Detail Level'
                 });
                 this.listenTo(detailLevelProperty, 'change:value', this.handleChangeDetailLevel);
