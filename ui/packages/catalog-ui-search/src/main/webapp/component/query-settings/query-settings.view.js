@@ -98,7 +98,7 @@ define([
             var sources = this.model.get('src');
             this._srcDropdownModel = new DropdownModel({
                 value: sources ? sources : [],
-                federation: this.model.get('federation')
+                federation: sources ? 'selected' : this.model.get('federation')
             });
             this.settingsSrc.show(new QuerySrcView({
                 model: this._srcDropdownModel

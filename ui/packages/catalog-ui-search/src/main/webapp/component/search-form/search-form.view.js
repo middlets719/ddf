@@ -62,7 +62,8 @@ module.exports = Marionette.LayoutView.extend({
                     title: this.model.get('name'),
                     filterTree: this.model.get('filterTemplate'),
                     accessGroups: this.model.get('accessGroups'),
-                    accessIndividuals: this.model.get('accessIndividuals')
+                    accessIndividuals: this.model.get('accessIndividuals'),
+                    src: this.model.get('src')
                 });
                 if (oldType === 'new-form') {
                     this.options.queryModel.trigger('change:type');
@@ -83,7 +84,8 @@ module.exports = Marionette.LayoutView.extend({
                     title: this.model.get('name'),
                     filterTree: this.model.get('filterTemplate'),
                     accessGroups: this.model.get('accessGroups'),
-                    accessIndividuals: this.model.get('accessIndividuals')
+                    accessIndividuals: this.model.get('accessIndividuals'),
+                    src: this.model.get('src')
                 });
                 if (oldType  === this.model.get('type')) {
                     this.options.queryModel.trigger('change:type');

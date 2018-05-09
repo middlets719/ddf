@@ -109,7 +109,8 @@ module.exports = Backbone.AssociatedModel.extend({
                         filterTemplate: JSON.stringify(value.filterTemplate),
                         accessIndividuals: value.accessIndividuals,
                         accessGroups: value.accessGroups,
-                        createdBy: value.creator
+                        createdBy: value.creator,
+                        src: value.src
                     }));
                 }
             }.bind(this));

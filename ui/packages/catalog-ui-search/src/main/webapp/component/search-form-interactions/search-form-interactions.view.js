@@ -152,7 +152,8 @@ module.exports =  Marionette.ItemView.extend({
                     filterTree: this.model.get('filterTemplate'),
                     id: this.model.get('id'),
                     accessGroups: this.model.get('accessGroups'),
-                    accessIndividuals: this.model.get('accessIndividuals')
+                    accessIndividuals: this.model.get('accessIndividuals'),
+                    src: this.model.get('src')
                 });
             }
             else if(this.model.get('type') === 'result')
