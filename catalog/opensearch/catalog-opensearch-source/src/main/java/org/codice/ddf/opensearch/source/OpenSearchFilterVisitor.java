@@ -20,13 +20,12 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import ddf.catalog.data.Metacard;
 import ddf.catalog.impl.filter.TemporalFilter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import org.codice.ddf.opensearch.OpenSearchConstants;
 import org.geotools.filter.AttributeExpressionImpl;
+import org.geotools.filter.FilterFactoryImpl;
+import org.geotools.filter.FunctionImpl;
 import org.geotools.filter.LikeFilterImpl;
 import org.geotools.filter.visitor.DefaultFilterVisitor;
 import org.geotools.geometry.jts.spatialschema.geometry.GeometryImpl;
@@ -35,6 +34,7 @@ import org.geotools.geometry.jts.spatialschema.geometry.primitive.SurfaceImpl;
 import org.geotools.temporal.object.DefaultInstant;
 import org.geotools.temporal.object.DefaultPeriodDuration;
 import org.opengis.filter.And;
+import org.opengis.filter.FilterFactory;
 import org.opengis.filter.Not;
 import org.opengis.filter.Or;
 import org.opengis.filter.PropertyIsEqualTo;
@@ -42,6 +42,7 @@ import org.opengis.filter.PropertyIsLike;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.Literal;
 import org.opengis.filter.expression.PropertyName;
+import org.opengis.filter.spatial.BBOX;
 import org.opengis.filter.spatial.BinarySpatialOperator;
 import org.opengis.filter.spatial.Contains;
 import org.opengis.filter.spatial.DWithin;
@@ -63,6 +64,8 @@ public class OpenSearchFilterVisitor extends DefaultFilterVisitor {
       "The OpenSearch Source does not support NOT operation.";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenSearchFilterVisitor.class);
+
+  private static final FilterFactory FF = new FilterFactoryImpl();
 
   @Override
   public Object visit(Not filter, Object data) {
@@ -155,6 +158,13 @@ public class OpenSearchFilterVisitor extends DefaultFilterVisitor {
     LOGGER.trace("EXITING: Intersects filter");
 
     return super.visit(filter, data);
+  }
+
+  @Override
+  public Object visit(BBOX filter, Object data) {
+    return this.visit(
+        ((FilterFactoryImpl) FF).intersects(filter.getExpression1(), filter.getExpression2()),
+        data);
   }
 
   /** TOverlaps filter maps to a Temporal (Absolute and Offset) search criteria. */
@@ -289,6 +299,12 @@ public class OpenSearchFilterVisitor extends DefaultFilterVisitor {
               expectedPropertyIsEqualToTerm,
               propertyName);
         }
+      } else if (expression1 instanceof FunctionImpl) {
+        //        String propertyName = expression1.propertyName;
+        //        Object literal = expression1.literal;
+        //        String functionName = expression1.functionName;
+        //        List<Object> functionArgs = expression1.functionArgs;
+        LOGGER.debug("This is where we do Keyword proxy");
       }
     }
 

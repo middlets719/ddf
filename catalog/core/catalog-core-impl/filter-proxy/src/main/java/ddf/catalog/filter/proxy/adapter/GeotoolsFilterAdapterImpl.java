@@ -695,8 +695,9 @@ public class GeotoolsFilterAdapterImpl implements FilterAdapter, FilterVisitor, 
   }
 
   public Object visit(BBOX filter, Object delegate) {
-    throw new UnsupportedOperationException(
-        BBOX.NAME + " filter is not supported by Filter Adapter.");
+    return this.visit(
+        ((FilterFactoryImpl) FF).intersects(filter.getExpression1(), filter.getExpression2()),
+        delegate);
   }
 
   public Object visit(Beyond filter, Object delegate) {

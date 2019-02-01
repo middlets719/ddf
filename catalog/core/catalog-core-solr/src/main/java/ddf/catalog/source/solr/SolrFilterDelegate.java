@@ -25,6 +25,7 @@ import ddf.catalog.data.Metacard;
 import ddf.catalog.data.Result;
 import ddf.catalog.filter.FilterDelegate;
 import ddf.catalog.impl.filter.DivisibleByFunction;
+import ddf.catalog.impl.filter.KeywordFunction;
 import ddf.catalog.impl.filter.ProximityFunction;
 import ddf.measure.Distance;
 import ddf.measure.Distance.LinearUnit;
@@ -186,6 +187,10 @@ public class SolrFilterDelegate extends FilterDelegate<SolrQuery> {
         query =
             propertyIsInProximityTo(
                 (String) arguments.get(0), (Integer) arguments.get(1), (String) arguments.get(2));
+        return query.setQuery(not + query.getQuery());
+      case KeywordFunction.FUNCTION_NAME_STRING:
+        not = (Boolean) literal ? "" : "!";
+        query = intersects((String) arguments.get(0), (String) arguments.get(1));
         return query.setQuery(not + query.getQuery());
       default:
         throw new UnsupportedOperationException(functionName + " is not supported.");

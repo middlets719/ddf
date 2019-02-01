@@ -15,6 +15,7 @@ package ddf.catalog.filter.delegate;
 
 import ddf.catalog.filter.FilterDelegate;
 import ddf.catalog.impl.filter.DivisibleByFunction;
+import ddf.catalog.impl.filter.KeywordFunction;
 import ddf.catalog.impl.filter.ProximityFunction;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +35,8 @@ public class FilterToTextDelegate extends FilterDelegate<String> {
                 (String) arguments.get(0), (Integer) arguments.get(1), (String) arguments.get(2))
             + '='
             + literal;
+      case KeywordFunction.FUNCTION_NAME_STRING:
+        return intersects((String) arguments.get(0), (String) arguments.get(1)) + '=' + literal;
       default:
         throw new UnsupportedOperationException(functionName + " is not supported.");
     }
