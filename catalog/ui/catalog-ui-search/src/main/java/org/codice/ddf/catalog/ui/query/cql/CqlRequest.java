@@ -270,7 +270,7 @@ public class CqlRequest {
   private Filter createFilter(FilterBuilder filterBuilder) {
     Filter filter = null;
     try {
-      filter = ECQL.toFilter(cql);
+      filter = EcqlProxy.toProxyFilter(ECQL.toFilter(cql));
     } catch (CQLException e) {
       halt(400, "Unable to parse CQL filter");
     }

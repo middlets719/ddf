@@ -54,6 +54,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.codice.ddf.catalog.ui.metacard.workspace.QueryMetacardImpl;
 import org.codice.ddf.catalog.ui.metacard.workspace.WorkspaceMetacardImpl;
+import org.codice.ddf.catalog.ui.query.cql.EcqlProxy;
 import org.codice.ddf.catalog.ui.query.monitor.api.FilterService;
 import org.codice.ddf.catalog.ui.query.monitor.api.QueryUpdateSubscriber;
 import org.codice.ddf.catalog.ui.query.monitor.api.SecurityService;
@@ -350,7 +351,7 @@ public class WorkspaceQueryServiceImpl implements WorkspaceQueryService {
 
   private Filter metacardToFilter(QueryMetacardImpl queryMetacard) {
     try {
-      return ECQL.toFilter(queryMetacard.getCql());
+      return EcqlProxy.toProxyFilter(ECQL.toFilter(queryMetacard.getCql()));
     } catch (CQLException e) {
       LOGGER.warn("Error parsing CQL", e);
       return null;
