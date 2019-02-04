@@ -28,6 +28,7 @@ import ddf.catalog.operation.impl.FacetedQueryRequest;
 import ddf.catalog.operation.impl.QueryImpl;
 import ddf.catalog.operation.impl.QueryRequestImpl;
 import ddf.catalog.operation.impl.TermFacetPropertiesImpl;
+import ddf.common.EcqlProxy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;

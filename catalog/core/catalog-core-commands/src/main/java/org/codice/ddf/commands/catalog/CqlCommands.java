@@ -19,6 +19,7 @@ import ddf.catalog.data.Metacard;
 import ddf.catalog.data.MetacardType;
 import ddf.catalog.data.types.Core;
 import ddf.catalog.filter.FilterBuilder;
+import ddf.common.EcqlProxy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -210,7 +211,7 @@ public abstract class CqlCommands extends CatalogCommands {
     filterCurrentTime = System.currentTimeMillis();
 
     if (cqlFilter != null) {
-      return ECQL.toFilter(cqlFilter);
+      return EcqlProxy.toProxyFilter(ECQL.toFilter(cqlFilter));
     }
 
     final long start = getFilterStartTime();

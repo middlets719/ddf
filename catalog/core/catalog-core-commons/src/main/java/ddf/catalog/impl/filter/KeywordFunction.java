@@ -33,7 +33,7 @@ public class KeywordFunction extends CustomFunctionImpl {
 
   private static final String FUNCTION_NAME_STRING = "keyword";
 
-  static final FunctionName FUNCTION_NAME =
+  public static final FunctionName FUNCTION_NAME =
       functionName(
           FUNCTION_NAME_STRING,
           "result:Boolean",

@@ -11,7 +11,7 @@
  * License is distributed along with this program and can be found at
  * <http://www.gnu.org/licenses/lgpl.html>.
  */
-package org.codice.ddf.catalog.ui.query.cql;
+package ddf.common;
 
 import ddf.catalog.impl.filter.CustomFunctionImpl;
 import java.util.function.Predicate;

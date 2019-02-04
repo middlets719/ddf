@@ -28,6 +28,7 @@ import ddf.catalog.operation.impl.QueryImpl;
 import ddf.catalog.operation.impl.QueryRequestImpl;
 import ddf.catalog.source.UnsupportedQueryException;
 import ddf.catalog.transform.QueryFilterTransformerProvider;
+import ddf.common.EcqlProxy;
 import ddf.security.permission.Permissions;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -175,7 +176,7 @@ public class CswQueryFactory {
     if (constraint != null) {
       if (constraint.isSetCqlText()) {
         try {
-          filter = ECQL.toFilter(constraint.getCqlText());
+          filter = EcqlProxy.toProxyFilter(ECQL.toFilter(constraint.getCqlText()));
         } catch (CQLException e) {
           throw new CswException("Unable to parse CQL Constraint: " + e.getMessage(), e);
         }

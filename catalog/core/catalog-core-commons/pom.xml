@@ -83,7 +83,7 @@
         <dependency>
             <groupId>org.codice.thirdparty</groupId>
             <artifactId>geotools-suite</artifactId>
-            <version>19.1_2</version>
+            <version>${org.geotools.bundle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
