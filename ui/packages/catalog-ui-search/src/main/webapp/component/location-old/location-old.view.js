@@ -185,6 +185,17 @@ module.exports = Marionette.LayoutView.extend({
           })
           wreqr.vent.trigger('search:linedisplay', this.model)
           break
+        case 'KEYWORD':
+          this.model.set({
+            locationType: 'latlon',
+            hasKeyword: true,
+            polyType: 'polygon',
+            mode: 'keyword',
+            polygon: CQLUtils.arrayFromPolygonWkt(filterValue),
+            keywordValue: filter.keywordValue
+          })
+          wreqr.vent.trigger('search:polydisplay', this.model)
+          break
       }
     }
   },

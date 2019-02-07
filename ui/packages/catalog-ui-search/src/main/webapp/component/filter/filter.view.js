@@ -400,8 +400,9 @@ module.exports = Marionette.LayoutView.extend({
       this.model.set({
         value: [
           {
+            type: 'KEYWORD',
             keywordValue: keywordValue,
-            polygon: polygon
+            value: polygon
           }
         ],
         type: property,
@@ -409,7 +410,7 @@ module.exports = Marionette.LayoutView.extend({
       })
     } else {
       throw new Error(
-        'Unsupported filter function in filter view: ' + filterFunctionName
+        'Unsupported filter function in filter view: ' + filter.filterFunctionName
       )
     }
   },
