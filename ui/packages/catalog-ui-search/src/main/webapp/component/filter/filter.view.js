@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/lgpl.html>.
  *
  **/
-/*global define, alert, setTimeout*/
+/* global define, alert, setTimeout */
 const Marionette = require('marionette')
 const _ = require('underscore')
 const template = require('./filter.hbs')
@@ -36,9 +36,9 @@ const generatePropertyJSON = (value, type, comparator) => {
     multivalued: false,
     enumFiltering: true,
     enumCustom: true,
-    matchcase: ['MATCHCASE', '='].indexOf(comparator) !== -1 ? true : false,
+    matchcase: ['MATCHCASE', '='].indexOf(comparator) !== -1,
     enum: metacardDefinitions.enums[type],
-    showValidationIssues: false,
+    showValidationIssues: false
   })
 
   if (propertyJSON.type === 'GEOMETRY') {
@@ -89,48 +89,48 @@ const stripQuotes = property => {
 module.exports = Marionette.LayoutView.extend({
   template: template,
   tagName: CustomElements.register('filter'),
-  attributes: function() {
+  attributes: function () {
     return { 'data-id': this.model.cid }
   },
   events: {
-    'click > .filter-remove': 'delete',
+    'click > .filter-remove': 'delete'
   },
   modelEvents: {},
   regions: {
     filterRearrange: '.filter-rearrange',
     filterAttribute: '.filter-attribute',
     filterComparator: '.filter-comparator',
-    filterInput: '.filter-input',
+    filterInput: '.filter-input'
   },
-  initialize: function() {
+  initialize: function () {
     this.listenTo(this.model, 'change:type', this.updateTypeDropdown)
     this.listenTo(this.model, 'change:type', this.determineInput)
     this.listenTo(this.model, 'change:value', this.determineInput)
     this.listenTo(this.model, 'change:comparator', this.determineInput)
   },
-  onBeforeShow: function() {
+  onBeforeShow: function () {
     this.$el.toggleClass('is-sortable', this.options.isSortable || true)
     this._filterDropdownModel = new DropdownModel({ value: 'CONTAINS' })
     this.filterAttribute.show(
       DropdownView.createSimpleDropdown({
         list: metacardDefinitions.sortedMetacardTypes
-          .filter(function(metacardType) {
+          .filter(function (metacardType) {
             return !properties.isHidden(metacardType.id)
           })
-          .filter(function(metacardType) {
+          .filter(function (metacardType) {
             return !metacardDefinitions.isHiddenType(metacardType.id)
           })
-          .map(function(metacardType) {
+          .map(function (metacardType) {
             return {
               label: metacardType.alias || metacardType.id,
               description: (properties.attributeDescriptions || {})[
                 metacardType.id
               ],
-              value: metacardType.id,
+              value: metacardType.id
             }
           }),
         defaultSelection: ['anyText'],
-        hasFiltering: true,
+        hasFiltering: true
       })
     )
     this.listenTo(
@@ -141,18 +141,18 @@ module.exports = Marionette.LayoutView.extend({
     this.filterComparator.show(
       new FilterComparatorDropdownView({
         model: this._filterDropdownModel,
-        modelForComponent: this.model,
+        modelForComponent: this.model
       })
     )
     this.determineInput()
   },
-  transformValue: function(value, comparator) {
+  transformValue: function (value, comparator) {
     switch (comparator) {
       case 'NEAR':
         if (value[0].constructor !== Object) {
           value[0] = {
             value: value[0],
-            distance: 2,
+            distance: 2
           }
         }
         break
@@ -171,7 +171,7 @@ module.exports = Marionette.LayoutView.extend({
     }
     return value
   },
-  comparatorToCQL: function() {
+  comparatorToCQL: function () {
     return {
       BEFORE: 'BEFORE',
       AFTER: 'AFTER',
@@ -185,10 +185,10 @@ module.exports = Marionette.LayoutView.extend({
       '<': '<',
       '=': '=',
       '<=': '<=',
-      '>=': '>=',
+      '>=': '>='
     }
   },
-  CQLtoComparator: function() {
+  CQLtoComparator: function () {
     var comparator = {}
     for (var key in this.comparatorToCQL()) {
       comparator[this.comparatorToCQL()[key]] = key
@@ -196,7 +196,7 @@ module.exports = Marionette.LayoutView.extend({
     return comparator
   },
   // With the relative date comparator being the same as =, we need to try and differentiate them this way
-  getComparatorForFilter(filter) {
+  getComparatorForFilter (filter) {
     const propertyDefinition =
       metacardDefinitions.metacardTypes[stripQuotes(filter.property)]
     if (
@@ -209,27 +209,27 @@ module.exports = Marionette.LayoutView.extend({
       return this.CQLtoComparator()[filter.type]
     }
   },
-  updateTypeDropdown: function() {
+  updateTypeDropdown: function () {
     this.filterAttribute.currentView.model.set('value', [
-      this.model.get('type'),
+      this.model.get('type')
     ])
   },
-  handleAttributeUpdate: function() {
+  handleAttributeUpdate: function () {
     this.model.set(
       'type',
       this.filterAttribute.currentView.model.get('value')[0]
     )
   },
-  delete: function() {
+  delete: function () {
     this.model.destroy()
   },
-  toggleLocationClass: function(toggle) {
+  toggleLocationClass: function (toggle) {
     this.$el.toggleClass('is-location', toggle)
   },
-  toggleDateClass: function(toggle) {
+  toggleDateClass: function (toggle) {
     this.$el.toggleClass('is-date', toggle)
   },
-  setDefaultComparator: function(propertyJSON) {
+  setDefaultComparator: function (propertyJSON) {
     this.toggleLocationClass(false)
     this.toggleDateClass(false)
     var currentComparator = this.model.get('comparator')
@@ -274,7 +274,7 @@ module.exports = Marionette.LayoutView.extend({
         break
     }
   },
-  updateValueFromInput: function() {
+  updateValueFromInput: function () {
     if (
       this.filterInput.currentView &&
       this.filterInput.currentView.model.hasChanged()
@@ -285,7 +285,7 @@ module.exports = Marionette.LayoutView.extend({
       )
     }
   },
-  determineInput: function() {
+  determineInput: function () {
     this.updateValueFromInput()
     let value = Common.duplicate(this.model.get('value'))
     const currentComparator = this.model.get('comparator')
@@ -298,7 +298,7 @@ module.exports = Marionette.LayoutView.extend({
     const ViewToUse = determineView(currentComparator)
     this.filterInput.show(
       new ViewToUse({
-        model: new PropertyModel(propertyJSON),
+        model: new PropertyModel(propertyJSON)
       })
     )
 
@@ -310,7 +310,7 @@ module.exports = Marionette.LayoutView.extend({
     }
     this.setDefaultComparator(propertyJSON)
   },
-  getValue: function() {
+  getValue: function () {
     var text = '('
     text += this.model.get('type') + ' '
     text += this.comparatorToCQL()[this.model.get('comparator')] + ' '
@@ -318,7 +318,7 @@ module.exports = Marionette.LayoutView.extend({
     text += ')'
     return text
   },
-  getFilters: function() {
+  getFilters: function () {
     var property = this.model.get('type')
     var comparator = this.model.get('comparator')
     var value = this.filterInput.currentView.model.getValue()[0]
@@ -327,7 +327,7 @@ module.exports = Marionette.LayoutView.extend({
       return CQLUtils.generateFilterForFilterFunction('proximity', [
         property,
         value.distance,
-        value.value,
+        value.value
       ])
     }
 
@@ -337,22 +337,22 @@ module.exports = Marionette.LayoutView.extend({
         type: 'AND',
         filters: this.filterInput.currentView.model
           .getValue()
-          .map(function(currentValue) {
+          .map(function (currentValue) {
             return CQLUtils.generateFilter(type, property, currentValue)
-          }),
+          })
       }
     } else {
       return CQLUtils.generateFilter(type, property, value)
     }
   },
-  deleteInvalidFilters: function() {
+  deleteInvalidFilters: function () {
     if (!this.filterInput.currentView.isValid()) {
       this.delete()
     }
   },
-  setFilter: function(filter) {
+  setFilter: function (filter) {
     setTimeout(
-      function() {
+      function () {
         if (CQLUtils.isGeoFilter(filter.type)) {
           filter.value = _.clone(filter)
         }
@@ -369,14 +369,14 @@ module.exports = Marionette.LayoutView.extend({
           this.model.set({
             value,
             type: filter.property.split('"').join(''),
-            comparator: this.getComparatorForFilter(filter),
+            comparator: this.getComparatorForFilter(filter)
           })
         }
       }.bind(this),
       0
     )
   },
-  setFilterFromFilterFunction(filter) {
+  setFilterFromFilterFunction (filter) {
     if (filter.filterFunctionName === 'proximity') {
       var property = filter.params[0]
       var distance = filter.params[1]
@@ -386,12 +386,26 @@ module.exports = Marionette.LayoutView.extend({
         value: [
           {
             value: value,
-            distance: distance,
-          },
+            distance: distance
+          }
         ],
         // this is confusing but 'type' on the model is actually the name of the property we're filtering on
         type: property,
-        comparator: 'NEAR',
+        comparator: 'NEAR'
+      })
+    } else if (filter.filterFunctionName === 'keyword') {
+      const property = filter.params[0]
+      const polygon = filter.params[1]
+      const keywordValue = filter.params[2]
+      this.model.set({
+        value: [
+          {
+            keywordValue: keywordValue,
+            polygon: polygon
+          }
+        ],
+        type: property,
+        comparator: 'INTERSECTS'
       })
     } else {
       throw new Error(
@@ -399,10 +413,10 @@ module.exports = Marionette.LayoutView.extend({
       )
     }
   },
-  onDestroy: function() {
+  onDestroy: function () {
     this._filterDropdownModel.destroy()
   },
-  turnOnEditing: function() {
+  turnOnEditing: function () {
     this.$el.addClass('is-editing')
     this.filterAttribute.currentView.turnOnEditing()
     this.filterComparator.currentView.turnOnEditing()
@@ -413,7 +427,7 @@ module.exports = Marionette.LayoutView.extend({
         : this.filterInput.currentView.model
     property.set('isEditing', true)
   },
-  turnOffEditing: function() {
+  turnOffEditing: function () {
     this.$el.removeClass('is-editing')
     this.filterAttribute.currentView.turnOffEditing()
     this.filterComparator.currentView.turnOffEditing()
@@ -426,5 +440,5 @@ module.exports = Marionette.LayoutView.extend({
       'isEditing',
       this.options.isForm === true || this.options.isFormBuilder === true
     )
-  },
+  }
 })
