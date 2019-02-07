@@ -22,7 +22,7 @@ var comparisonClass = 'Comparison',
   temporalClass = 'Temporal',
   timePatter = /([0-9]{4})(-([0-9]{2})(-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?/i,
   patterns = {
-    //Allows for non-standard single-quoted property names
+    // Allows for non-standard single-quoted property names
     PROPERTY: /^([_a-zA-Z]\w*|"[^"]+"|'[^']+')/,
     COMPARISON: /^(=|<>|<=|<|>=|>|LIKE|ILIKE)/i,
     IS_NULL: /^IS NULL/i,
@@ -43,7 +43,7 @@ var comparisonClass = 'Comparison',
     RELATIVE: /^'RELATIVE\([A-Za-z0-9.]*\)'/i,
     TIME: new RegExp('^' + timePatter.source),
     TIME_PERIOD: new RegExp('^' + timePatter.source + '/' + timePatter.source),
-    GEOMETRY: function(text) {
+    GEOMETRY: function (text) {
       var type = /^(POINT|LINESTRING|POLYGON|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON|GEOMETRYCOLLECTION)/.exec(
         text
       )
@@ -69,7 +69,7 @@ var comparisonClass = 'Comparison',
         return [text.substr(0, idx + 1)]
       }
     },
-    END: /^$/,
+    END: /^$/
   },
   follows = {
     ROOT_NODE: [
@@ -78,7 +78,7 @@ var comparisonClass = 'Comparison',
       'SPATIAL',
       'FILTER_FUNCTION',
       'PROPERTY',
-      'LPAREN',
+      'LPAREN'
     ],
     LPAREN: [
       'NOT',
@@ -87,7 +87,7 @@ var comparisonClass = 'Comparison',
       'FILTER_FUNCTION',
       'PROPERTY',
       'VALUE',
-      'LPAREN',
+      'LPAREN'
     ],
     RPAREN: ['NOT', 'LOGICAL', 'END', 'RPAREN', 'COMPARISON', 'COMMA'],
     PROPERTY: [
@@ -98,7 +98,7 @@ var comparisonClass = 'Comparison',
       'BEFORE',
       'AFTER',
       'DURING',
-      'RPAREN',
+      'RPAREN'
     ],
     BETWEEN: ['VALUE'],
     IS_NULL: ['END'],
@@ -114,7 +114,7 @@ var comparisonClass = 'Comparison',
       'VALUE',
       'SPATIAL',
       'PROPERTY',
-      'LPAREN',
+      'LPAREN'
     ],
     NOT: ['PROPERTY', 'LPAREN'],
     GEOMETRY: ['COMMA', 'RPAREN'],
@@ -124,12 +124,12 @@ var comparisonClass = 'Comparison',
     TIME: ['LOGICAL', 'RPAREN', 'END'],
     TIME_PERIOD: ['LOGICAL', 'RPAREN', 'END'],
     RELATIVE: ['RPAREN'],
-    FILTER_FUNCTION: ['LPAREN', 'PROPERTY', 'VALUE', 'RPAREN'],
+    FILTER_FUNCTION: ['LPAREN', 'PROPERTY', 'VALUE', 'RPAREN']
   },
   precedence = {
     RPAREN: 3,
     LOGICAL: 2,
-    COMPARISON: 1,
+    COMPARISON: 1
   },
   classes = {
     '=': comparisonClass,
@@ -153,16 +153,17 @@ var comparisonClass = 'Comparison',
     GEOMETRY: spatialClass,
     BEFORE: temporalClass,
     AFTER: temporalClass,
-    DURING: temporalClass,
+    DURING: temporalClass
   },
   // as an improvement, these could be figured out while building the syntax tree
   filterFunctionParamCount = {
     proximity: 3,
     pi: 0,
+    keyword: 3
   },
   dateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 
-function tryToken(text, pattern) {
+function tryToken (text, pattern) {
   if (pattern instanceof RegExp) {
     return pattern.exec(text)
   } else {
@@ -170,7 +171,7 @@ function tryToken(text, pattern) {
   }
 }
 
-function nextToken(text, tokens) {
+function nextToken (text, tokens) {
   var i,
     token,
     len = tokens.length
@@ -184,7 +185,7 @@ function nextToken(text, tokens) {
       return {
         type: token,
         text: match,
-        remainder: remainder,
+        remainder: remainder
       }
     }
   }
@@ -198,7 +199,7 @@ function nextToken(text, tokens) {
   throw new Error(msg)
 }
 
-function tokenize(text) {
+function tokenize (text) {
   var results = []
   var token,
     expect = follows['ROOT_NODE']
@@ -221,7 +222,7 @@ const userqlToCql = {
   '*': '%',
   '?': '_',
   '%': '\\%',
-  _: '\\_',
+  _: '\\_'
 }
 
 const translateUserqlToCql = str =>
@@ -230,10 +231,10 @@ const translateUserqlToCql = str =>
     (_, a = '', b) => a + (a === '\\' ? b : userqlToCql[b])
   )
 
-//Mapping of CQL syntax to Intrigue's query language syntax
+// Mapping of CQL syntax to Intrigue's query language syntax
 const cqlToUserql = {
   '%': '*',
-  _: '?',
+  _: '?'
 }
 
 const translateCqlToUserql = str =>
@@ -242,7 +243,7 @@ const translateCqlToUserql = str =>
     (_, a = '', b) => (a === '\\' ? b : a + cqlToUserql[b])
   )
 
-function buildAst(tokens) {
+function buildAst (tokens) {
   var operatorStack = [],
     postfix = []
 
@@ -323,7 +324,7 @@ function buildAst(tokens) {
     postfix.push(operatorStack.pop())
   }
 
-  function buildTree() {
+  function buildTree () {
     var value,
       property,
       tok = postfix.pop()
@@ -333,13 +334,13 @@ function buildAst(tokens) {
           lhs = buildTree()
         return {
           filters: [lhs, rhs],
-          type: tok.text.toUpperCase(),
+          type: tok.text.toUpperCase()
         }
       case 'NOT':
         var operand = buildTree()
         return {
           filters: [operand],
-          type: tok.type,
+          type: tok.type
         }
       case 'BETWEEN':
         var min, max
@@ -351,7 +352,7 @@ function buildAst(tokens) {
           property: property,
           lowerBoundary: min,
           upperBoundary: max,
-          type: tok.type,
+          type: tok.type
         }
       case 'BEFORE':
       case 'AFTER':
@@ -360,7 +361,7 @@ function buildAst(tokens) {
         return {
           property: property,
           value: moment(value).toISOString(),
-          type: tok.text.toUpperCase(),
+          type: tok.text.toUpperCase()
         }
       case 'DURING':
         var dates = buildTree().split('/')
@@ -369,7 +370,7 @@ function buildAst(tokens) {
           property: property,
           from: dates[0],
           to: dates[1],
-          type: tok.text.toUpperCase(),
+          type: tok.text.toUpperCase()
         }
       case 'COMPARISON':
         value = buildTree()
@@ -377,13 +378,13 @@ function buildAst(tokens) {
         return {
           property: property,
           value: value,
-          type: tok.text.toUpperCase(),
+          type: tok.text.toUpperCase()
         }
       case 'IS_NULL':
         property = buildTree()
         return {
           property: property,
-          type: tok.text.toUpperCase(),
+          type: tok.text.toUpperCase()
         }
       case 'VALUE':
         var match = tok.text.match(/^'(.*)'$/)
@@ -411,7 +412,7 @@ function buildAst(tokens) {
             return {
               type: tok.text.toUpperCase(),
               property: prop,
-              value: [minx, miny, maxx, maxy],
+              value: [minx, miny, maxx, maxy]
             }
           case 'INTERSECTS':
             value = buildTree()
@@ -419,7 +420,7 @@ function buildAst(tokens) {
             return {
               type: tok.text.toUpperCase(),
               property: property,
-              value: value,
+              value: value
             }
           case 'WITHIN':
             value = buildTree()
@@ -427,7 +428,7 @@ function buildAst(tokens) {
             return {
               type: tok.text.toUpperCase(),
               property: property,
-              value: value,
+              value: value
             }
           case 'CONTAINS':
             value = buildTree()
@@ -435,7 +436,7 @@ function buildAst(tokens) {
             return {
               type: tok.text.toUpperCase(),
               property: property,
-              value: value,
+              value: value
             }
           case 'DWITHIN':
             var distance = buildTree()
@@ -445,14 +446,14 @@ function buildAst(tokens) {
               type: tok.text.toUpperCase(),
               value: value,
               property: property,
-              distance: Number(distance),
+              distance: Number(distance)
             }
         }
         break
       case 'GEOMETRY':
         return {
           type: tok.type,
-          value: tok.text,
+          value: tok.text
         }
       case 'RELATIVE':
         return tok.text.substring(1, tok.text.length - 1)
@@ -464,7 +465,7 @@ function buildAst(tokens) {
         }
 
         var params = Array.apply(null, Array(paramCount))
-          .map(function() {
+          .map(function () {
             return buildTree()
           })
           .reverse()
@@ -472,7 +473,7 @@ function buildAst(tokens) {
         return {
           type: tok.type,
           filterFunctionName,
-          params,
+          params
         }
 
       default:
@@ -492,7 +493,7 @@ function buildAst(tokens) {
   return result
 }
 
-function wrap(property) {
+function wrap (property) {
   var wrapped = property
   if (!wrapped.startsWith('"')) {
     wrapped = '"' + wrapped
@@ -503,7 +504,7 @@ function wrap(property) {
   return wrapped
 }
 
-function write(filter) {
+function write (filter) {
   switch (classes[filter.type]) {
     case spatialClass:
       switch (filter.type) {
@@ -623,12 +624,12 @@ function write(filter) {
       }
       break
     case undefined:
-      if (filter.type == 'FILTER_FUNCTION') {
+      if (filter.type === 'FILTER_FUNCTION') {
         return (
           filter.filterFunctionName +
           '(' +
           filter.params
-            .map(function(param) {
+            .map(function (param) {
               return write(param)
             })
             .join(',') +
@@ -647,18 +648,18 @@ function write(filter) {
   }
 }
 
-function simplifyFilters(cqlAst) {
+function simplifyFilters (cqlAst) {
   for (var i = 0; i < cqlAst.filters.length; i++) {
     if (simplifyAst(cqlAst.filters[i], cqlAst)) {
       var filtersToMerge = cqlAst.filters.splice(i, 1)[0]
-      filtersToMerge.filters.forEach(function(filter) {
+      filtersToMerge.filters.forEach(function (filter) {
         cqlAst.filters.push(filter)
       })
     }
   }
 }
 
-function simplifyAst(cqlAst, parentNode) {
+function simplifyAst (cqlAst, parentNode) {
   if (!cqlAst.filters && parentNode) {
     return false
   } else if (!parentNode) {
@@ -676,9 +677,9 @@ function simplifyAst(cqlAst, parentNode) {
   }
 }
 
-function collapseNOTs(cqlAst, parentNode) {
+function collapseNOTs (cqlAst, parentNode) {
   if (cqlAst.filters) {
-    cqlAst.filters.forEach(function(filter) {
+    cqlAst.filters.forEach(function (filter) {
       collapseNOTs(filter, cqlAst)
     })
     if (cqlAst.type === 'NOT') {
@@ -691,9 +692,9 @@ function collapseNOTs(cqlAst, parentNode) {
   }
 }
 
-function uncollapseNOTs(cqlAst, parentNode) {
+function uncollapseNOTs (cqlAst, parentNode) {
   if (cqlAst.filters) {
-    cqlAst.filters.forEach(function(filter) {
+    cqlAst.filters.forEach(function (filter) {
       uncollapseNOTs(filter, cqlAst)
     })
     if (cqlAst.type === 'NOT OR') {
@@ -701,22 +702,22 @@ function uncollapseNOTs(cqlAst, parentNode) {
       cqlAst.filters = [
         {
           type: 'OR',
-          filters: cqlAst.filters,
-        },
+          filters: cqlAst.filters
+        }
       ]
     } else if (cqlAst.type === 'NOT AND') {
       cqlAst.type = 'NOT'
       cqlAst.filters = [
         {
           type: 'AND',
-          filters: cqlAst.filters,
-        },
+          filters: cqlAst.filters
+        }
       ]
     }
   }
 }
 
-function iterativelySimplify(cqlAst) {
+function iterativelySimplify (cqlAst) {
   var prevAst = JSON.parse(JSON.stringify(cqlAst))
   simplifyAst(cqlAst)
   while (JSON.stringify(prevAst) !== JSON.stringify(cqlAst)) {
@@ -726,25 +727,25 @@ function iterativelySimplify(cqlAst) {
 }
 
 module.exports = {
-  read: function(cql) {
+  read: function (cql) {
     if (cql === undefined || cql.length === 0) {
       return {
         type: 'AND',
-        filters: [],
+        filters: []
       }
     }
     return buildAst(tokenize(cql))
   },
-  write: function(filter) {
+  write: function (filter) {
     uncollapseNOTs(filter)
     return write(filter)
   },
-  simplify: function(cqlAst) {
+  simplify: function (cqlAst) {
     iterativelySimplify(cqlAst)
     collapseNOTs(cqlAst)
     iterativelySimplify(cqlAst)
     return cqlAst
   },
   translateCqlToUserql,
-  translateUserqlToCql,
+  translateUserqlToCql
 }

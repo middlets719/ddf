@@ -9,12 +9,12 @@
  * <http://www.gnu.org/licenses/lgpl.html>.
  *
  **/
-/*jshint bitwise: false*/
+/* jshint bitwise: false */
 const $ = require('jquery')
 const cql = require('./cql.js')
 const DistanceUtils = require('./DistanceUtils.js')
 
-function sanitizeForCql(text) {
+function sanitizeForCql (text) {
   return text
     .split('[')
     .join('(')
@@ -26,15 +26,15 @@ function sanitizeForCql(text) {
     .join('')
 }
 
-function lineToCQLLine(model) {
-  var cqlLINE = model.map(function(point) {
+function lineToCQLLine (model) {
+  var cqlLINE = model.map(function (point) {
     return point[0] + ' ' + point[1]
   })
   return cqlLINE
 }
 
-function polygonToCQLPolygon(model) {
-  var cqlPolygon = model.map(function(point) {
+function polygonToCQLPolygon (model) {
+  var cqlPolygon = model.map(function (point) {
     return point[0] + ' ' + point[1]
   })
   if (cqlPolygon[0] !== cqlPolygon[cqlPolygon.length - 1]) {
@@ -43,20 +43,20 @@ function polygonToCQLPolygon(model) {
   return [cqlPolygon]
 }
 
-function polygonToCQLMultiPolygon(model) {
-  return model.map(function(polygon) {
+function polygonToCQLMultiPolygon (model) {
+  return model.map(function (polygon) {
     return polygonToCQLPolygon(polygon)
   })
 }
 
-function bboxToCQLPolygon(model) {
+function bboxToCQLPolygon (model) {
   if (model.locationType === 'usng') {
     return [
       model.mapWest + ' ' + model.mapSouth,
       model.mapWest + ' ' + model.mapNorth,
       model.mapEast + ' ' + model.mapNorth,
       model.mapEast + ' ' + model.mapSouth,
-      model.mapWest + ' ' + model.mapSouth,
+      model.mapWest + ' ' + model.mapSouth
     ]
   } else {
     return [
@@ -64,12 +64,12 @@ function bboxToCQLPolygon(model) {
       model.west + ' ' + model.north,
       model.east + ' ' + model.north,
       model.east + ' ' + model.south,
-      model.west + ' ' + model.south,
+      model.west + ' ' + model.south
     ]
   }
 }
 
-function generateAnyGeoFilter(property, model) {
+function generateAnyGeoFilter (property, model) {
   switch (model.type) {
     case 'LINE':
       return {
@@ -81,7 +81,7 @@ function generateAnyGeoFilter(property, model) {
         distance: DistanceUtils.getDistanceInMeters(
           model.lineWidth,
           model.lineUnits
-        ),
+        )
       }
     case 'POLYGON':
       return {
@@ -94,8 +94,8 @@ function generateAnyGeoFilter(property, model) {
           distance: DistanceUtils.getDistanceInMeters(
             model.polygonBufferWidth,
             model.polygonBufferUnits
-          ),
-        }),
+          )
+        })
       }
     case 'MULTIPOLYGON':
       var poly =
@@ -109,8 +109,8 @@ function generateAnyGeoFilter(property, model) {
           distance: DistanceUtils.getDistanceInMeters(
             model.polygonBufferWidth,
             model.polygonBufferUnits
-          ),
-        }),
+          )
+        })
       }
     case 'BBOX':
       return {
@@ -119,7 +119,7 @@ function generateAnyGeoFilter(property, model) {
         value:
           'POLYGON(' +
           sanitizeForCql(JSON.stringify(bboxToCQLPolygon(model))) +
-          ')',
+          ')'
       }
     case 'POINTRADIUS':
       return {
@@ -129,22 +129,28 @@ function generateAnyGeoFilter(property, model) {
         distance: DistanceUtils.getDistanceInMeters(
           model.radius,
           model.radiusUnits
-        ),
+        )
       }
+    case 'KEYWORD':
+      const filterFunctionName = 'keyword'
+      const params = [`${property}`, `POLYGON${sanitizeForCql(
+        JSON.stringify(polygonToCQLPolygon(model.polygon)))}`,
+      model.keywordValue ]
+      return generateFilterForFilterFunction(filterFunctionName, params)
     default:
       return {
         type: 'INTERSECTS',
         property: property,
-        value: '',
+        value: ''
       }
   }
 }
 
-function buildIntersectOrCQL(shapes) {
+function buildIntersectOrCQL (shapes) {
   var locationFilter = ''
   $.each(
     shapes,
-    function(i, shape) {
+    function (i, shape) {
       locationFilter += this.buildIntersectCQL(shape)
 
       if (i !== shapes.length - 1) {
@@ -156,7 +162,7 @@ function buildIntersectOrCQL(shapes) {
   return locationFilter
 }
 
-function arrayFromPartialWkt(partialWkt) {
+function arrayFromPartialWkt (partialWkt) {
   // remove the leading and trailing parentheses
   var result = partialWkt.replace(/^\(/, '').replace(/\)$/, '')
   // change parentheses to array brackets
@@ -167,8 +173,8 @@ function arrayFromPartialWkt(partialWkt) {
   return JSON.parse(result)
 }
 
-function sanitizeGeometryCql(cqlString) {
-  //sanitize polygons
+function sanitizeGeometryCql (cqlString) {
+  // sanitize polygons
   let polygons = cqlString.match(
     /'POLYGON\(\((-?[0-9]*.?[0-9]* -?[0-9]*.?[0-9]*,?)*\)\)'/g
   )
@@ -178,7 +184,7 @@ function sanitizeGeometryCql(cqlString) {
     })
   }
 
-  //sanitize multipolygons
+  // sanitize multipolygons
   let multipolygons = cqlString.match(/'MULTIPOLYGON\(\(\(.*\)\)\)'/g)
   if (multipolygons) {
     multipolygons.forEach(multipolygon => {
@@ -189,7 +195,7 @@ function sanitizeGeometryCql(cqlString) {
     })
   }
 
-  //sanitize points
+  // sanitize points
   let points = cqlString.match(/'POINT\(-?[0-9]*.?[0-9]* -?[0-9]*.?[0-9]*\)'/g)
   if (points) {
     points.forEach(point => {
@@ -197,7 +203,7 @@ function sanitizeGeometryCql(cqlString) {
     })
   }
 
-  //sanitize linestrings
+  // sanitize linestrings
   let linestrings = cqlString.match(
     /'LINESTRING\((-?[0-9]*.?[0-9]* -?[0-9]*.?[0-9]*.?)*\)'/g
   )
@@ -209,14 +215,14 @@ function sanitizeGeometryCql(cqlString) {
   return cqlString
 }
 
-function getProperty(filter) {
+function getProperty (filter) {
   if (typeof filter.property !== 'string') {
     return null
   }
   return filter.property.split('"').join('')
 }
 
-function generateFilter(type, property, value, metacardDefinitions) {
+function generateFilter (type, property, value, metacardDefinitions) {
   if (!metacardDefinitions) {
     metacardDefinitions = require('../component/singletons/metacard-definitions.js')
   }
@@ -228,7 +234,7 @@ function generateFilter(type, property, value, metacardDefinitions) {
       const filter = {
         type,
         property,
-        value,
+        value
       }
 
       if (type === 'DURING') {
@@ -241,29 +247,29 @@ function generateFilter(type, property, value, metacardDefinitions) {
   }
 }
 
-function generateFilterForFilterFunction(filterFunctionName, params) {
+function generateFilterForFilterFunction (filterFunctionName, params) {
   return {
     type: '=',
     value: true,
     property: {
       type: 'FILTER_FUNCTION',
       filterFunctionName,
-      params,
-    },
+      params
+    }
   }
 }
 
-function isGeoFilter(type) {
+function isGeoFilter (type) {
   return type === 'DWITHIN' || type === 'INTERSECTS'
 }
 
-function transformFilterToCQL(filter) {
+function transformFilterToCQL (filter) {
   return this.sanitizeGeometryCql(
     '(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')'
   )
 }
 
-function transformCQLToFilter(cqlString) {
+function transformCQLToFilter (cqlString) {
   return cql.simplify(cql.read(cqlString))
 }
 
@@ -275,13 +281,13 @@ const isPolygonFilter = filter => {
   )
 }
 
-function isPointRadiusFilter(filter) {
+function isPointRadiusFilter (filter) {
   var filterValue =
     typeof filter.value === 'object' ? filter.value.value : filter.value
   return filterValue && filterValue.indexOf('POINT') >= 0
 }
 
-function buildIntersectCQL(locationGeometry) {
+function buildIntersectCQL (locationGeometry) {
   var locationFilter = ''
   var locationWkt = locationGeometry.toWkt()
   var locationType = locationGeometry.toGeoJSON().type.toUpperCase()
@@ -299,7 +305,7 @@ function buildIntersectCQL(locationGeometry) {
 
         $.each(
           shapes,
-          function(i, polygon) {
+          function (i, polygon) {
             locationWkt = polygon.replace(/POLYGON|[()]/g, '')
             locationWkt = 'POLYGON((' + locationWkt + '))'
             locationFilter += '(INTERSECTS(anyGeo, ' + locationWkt + '))'
@@ -307,7 +313,7 @@ function buildIntersectCQL(locationGeometry) {
             if (i !== shapes.length - 1) {
               locationFilter += ' OR '
             }
-          }.bind(this)
+          }
         )
       } else {
         locationFilter = '(INTERSECTS(anyGeo, ' + locationWkt + '))'
@@ -337,7 +343,7 @@ function buildIntersectCQL(locationGeometry) {
   return locationFilter
 }
 
-function arrayFromPolygonWkt(wkt) {
+function arrayFromPolygonWkt (wkt) {
   // Handle POLYGON with no internal rings (i.e. holes)
   if (wkt.startsWith('POLYGON')) {
     const polygon = wkt.match(/\(\([^\(\)]+\)\)/g)
@@ -348,9 +354,9 @@ function arrayFromPolygonWkt(wkt) {
   let polygons = wkt.match(/\(\([^\(\)]+\)\)/g)
   if (polygons) {
     return polygons.map(
-      function(polygon) {
+      function (polygon) {
         return arrayFromPartialWkt(polygon)
-      }.bind(this)
+      }
     )
   }
   return []
@@ -367,5 +373,5 @@ module.exports = {
   isPolygonFilter,
   isPointRadiusFilter,
   buildIntersectCQL,
-  arrayFromPolygonWkt,
+  arrayFromPolygonWkt
 }

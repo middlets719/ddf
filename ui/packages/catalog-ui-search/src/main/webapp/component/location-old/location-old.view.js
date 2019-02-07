@@ -14,20 +14,20 @@ const React = require('react')
 
 const withAdapter = Component =>
   class extends React.Component {
-    constructor(props) {
+    constructor (props) {
       super(props)
       this.state = props.model.toJSON()
     }
-    setModelState() {
+    setModelState () {
       this.setState(this.props.model.toJSON())
     }
-    componentWillMount() {
+    componentWillMount () {
       this.props.model.on('change', this.setModelState, this)
     }
-    componentWillUnmount() {
+    componentWillUnmount () {
       this.props.model.off('change', this.setModelState)
     }
-    render() {
+    render () {
       return (
         <Component
           state={this.state}
@@ -56,22 +56,22 @@ const minimumDifference = 0.0001
 const minimumBuffer = 0.000001
 
 module.exports = Marionette.LayoutView.extend({
-  template: function() {
+  template: function () {
     const props = {
       model: this.model,
       options: {
         onDraw: drawingType => {
           wreqr.vent.trigger('search:draw' + this.model.get('mode'), this.model)
-        },
-      },
+        }
+      }
     }
     return <LocationView {...props} />
   },
   tagName: CustomElements.register('location-old'),
   regions: {
-    location: '.location-input',
+    location: '.location-input'
   },
-  initialize: function(options) {
+  initialize: function (options) {
     this.propertyModel = this.model
     this.model = new LocationOldModel()
     _.bindAll.apply(_, [this].concat(_.functions(this))) // underscore bindAll does not take array arg
@@ -88,7 +88,7 @@ module.exports = Marionette.LayoutView.extend({
     })
   },
   // Updates the map with a drawing whenever the user is entering coordinates manually
-  updateMap: function() {
+  updateMap: function () {
     if (!this.isDestroyed) {
       var mode = this.model.get('mode')
       if (mode !== undefined && store.get('content').get('drawing') !== true) {
@@ -96,17 +96,17 @@ module.exports = Marionette.LayoutView.extend({
       }
     }
   },
-  setupListeners: function() {
+  setupListeners: function () {
     this.listenTo(
       this.model,
       'change:mapNorth change:mapSouth change:mapEast change:mapWest',
       this.updateMaxAndMin
     )
   },
-  updateMaxAndMin: function() {
+  updateMaxAndMin: function () {
     this.model.setLatLon()
   },
-  deserialize: function() {
+  deserialize: function () {
     if (this.propertyModel) {
       var filter = this.propertyModel.get('value')
       var filterValue =
@@ -123,7 +123,7 @@ module.exports = Marionette.LayoutView.extend({
               locationType: 'latlon',
               lat: latLon[1],
               lon: latLon[0],
-              radius: filter.distance,
+              radius: filter.distance
             })
             wreqr.vent.trigger('search:circledisplay', this.model)
           } else if (CQLUtils.isPolygonFilter(filter)) {
@@ -134,11 +134,11 @@ module.exports = Marionette.LayoutView.extend({
             this.model.set({
               mode: 'line',
               lineWidth: filter.distance,
-              line: pointText.split(',').map(function(coordinate) {
-                return coordinate.split(' ').map(function(value) {
+              line: pointText.split(',').map(function (coordinate) {
+                return coordinate.split(' ').map(function (value) {
                   return Number(value)
                 })
-              }),
+              })
             })
             wreqr.vent.trigger('search:linedisplay', this.model)
           }
@@ -148,7 +148,7 @@ module.exports = Marionette.LayoutView.extend({
             break
           }
           this.handlePolygonDeserialization({
-            polygon: CQLUtils.arrayFromPolygonWkt(filterValue),
+            polygon: CQLUtils.arrayFromPolygonWkt(filterValue)
           })
           break
         // these cases are for when the model matches the location model
@@ -159,7 +159,7 @@ module.exports = Marionette.LayoutView.extend({
             north: filter.north,
             south: filter.south,
             east: filter.east,
-            west: filter.west,
+            west: filter.west
           })
           wreqr.vent.trigger('search:bboxdisplay', this.model)
           break
@@ -173,7 +173,7 @@ module.exports = Marionette.LayoutView.extend({
             locationType: 'latlon',
             lat: filter.lat,
             lon: filter.lon,
-            radius: filter.radius,
+            radius: filter.radius
           })
           wreqr.vent.trigger('search:circledisplay', this.model)
           break
@@ -181,14 +181,14 @@ module.exports = Marionette.LayoutView.extend({
           this.model.set({
             mode: 'line',
             line: filter.line,
-            lineWidth: filter.lineWidth,
+            lineWidth: filter.lineWidth
           })
           wreqr.vent.trigger('search:linedisplay', this.model)
           break
       }
     }
   },
-  handlePolygonDeserialization(filter) {
+  handlePolygonDeserialization (filter) {
     const polygonArray =
       (filter.value &&
         filter.value.value &&
@@ -199,11 +199,11 @@ module.exports = Marionette.LayoutView.extend({
     this.model.set({
       mode: 'poly',
       polygon: filter.polygon || polygonArray,
-      ...(bufferWidth && { polygonBufferWidth: bufferWidth }),
+      ...(bufferWidth && { polygonBufferWidth: bufferWidth })
     })
     wreqr.vent.trigger('search:polydisplay', this.model)
   },
-  clearLocation: function() {
+  clearLocation: function () {
     this.model.set({
       north: undefined,
       east: undefined,
@@ -242,18 +242,22 @@ module.exports = Marionette.LayoutView.extend({
       utmUpsLowerRightZone: 1,
       utmUpsLowerRightHemisphere: 'Northern',
       line: undefined,
-      lineWidth: 1,
+      lineWidth: 1
     })
     wreqr.vent.trigger('search:drawend', this.model)
     this.$el.trigger('change')
   },
-  getCurrentValue: function() {
+  getCurrentValue: function () {
     var modelJSON = this.model.toJSON()
     var type
     if (modelJSON.polygon !== undefined) {
-      type = ShapeUtils.isArray3D(modelJSON.polygon)
-        ? 'MULTIPOLYGON'
-        : 'POLYGON'
+      if (modelJSON.mode === 'keyword') {
+        type = 'KEYWORD'
+      } else {
+        type = ShapeUtils.isArray3D(modelJSON.polygon)
+          ? 'MULTIPOLYGON'
+          : 'POLYGON'
+      }
     } else if (
       modelJSON.lat !== undefined &&
       modelJSON.lon !== undefined &&
@@ -277,13 +281,13 @@ module.exports = Marionette.LayoutView.extend({
     return _.extend(modelJSON, {
       type: type,
       lineWidth: Math.max(modelJSON.lineWidth, minimumBuffer),
-      radius: Math.max(modelJSON.radius, minimumBuffer),
+      radius: Math.max(modelJSON.radius, minimumBuffer)
     })
   },
-  onDestroy: function() {
+  onDestroy: function () {
     wreqr.vent.trigger('search:drawend', this.model)
   },
-  isValid: function() {
+  isValid: function () {
     return this.getCurrentValue().type != undefined
-  },
+  }
 })
