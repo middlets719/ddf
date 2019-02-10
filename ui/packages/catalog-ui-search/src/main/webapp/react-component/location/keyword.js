@@ -8,30 +8,30 @@ const MultiPolygon = require('./multipoly')
 import fetch from '../../react-component/utils/fetch'
 
 class Keyword extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
-      value: typeof props.value === 'string' ? props.value : '',
+      keywordValue: typeof props.keywordValue === 'string' ? props.keywordValue : '',
       loading: false,
       error: null,
-      polyType: null,
+      polyType: null
     }
     this.fetch = this.props.fetch || fetch
   }
-  async suggester(input) {
+  async suggester (input) {
     const res = await this.fetch(`./internal/geofeature/suggestions?q=${input}`)
     const json = await res.json()
     return await json.filter(suggestion => !suggestion.id.startsWith('LITERAL'))
   }
-  async geofeature(suggestion) {
+  async geofeature (suggestion) {
     const { id } = suggestion
     const res = await this.fetch(`./internal/geofeature?id=${id}`)
     return await res.json()
   }
-  async onChange(suggestion) {
+  async onChange (suggestion) {
     const geofeature =
       this.props.geofeature || (suggestItem => this.geofeature(suggestItem))
-    this.setState({ value: suggestion.name, loading: true })
+    this.setState({ keywordValue: suggestion.name, loading: true })
     try {
       const { type, geometry = {} } = await geofeature(suggestion)
       this.setState({ loading: false })
@@ -44,12 +44,12 @@ class Keyword extends React.Component {
             locationType: 'latlon',
             polygon: polygon,
             polyType: 'polygon',
-            keywordValue: this.state.value,
+            keywordValue: this.state.keywordValue
           })
           break
         }
         case 'MultiPolygon': {
-          const polygon = geometry.coordinates.map(function(ring) {
+          const polygon = geometry.coordinates.map(function (ring) {
             return ring[0] // outer ring only
           })
           this.props.setState({
@@ -57,7 +57,7 @@ class Keyword extends React.Component {
             locationType: 'latlon',
             polygon: polygon,
             polyType: 'multipolygon',
-            keywordValue: this.state.value,
+            keywordValue: this.state.keywordValue
           })
           break
         }
@@ -65,7 +65,7 @@ class Keyword extends React.Component {
           Announcement.announce({
             title: 'Invalid feature',
             message: 'Unrecognized feature type: ' + JSON.stringify(type),
-            type: 'error',
+            type: 'error'
           })
         }
       }
@@ -80,28 +80,28 @@ class Keyword extends React.Component {
       )
     }
   }
-  render() {
+  render () {
     const suggester = this.props.suggester || (input => this.suggester(input))
     const {
       polygon,
       cursor,
       polygonBufferWidth,
       polygonBufferUnits,
-      polyType,
+      polyType
     } = this.props
-    const { value, loading, error } = this.state
+    const { keywordValue, loading, error } = this.state
     return (
       <div>
         <AutoComplete
-          value={value}
+          value={keywordValue}
           onChange={option => this.onChange(option)}
           minimumInputLength={2}
-          placeholder="Enter a region, country, or city"
+          placeholder='Enter a region, country, or city'
           suggester={suggester}
         />
         {loading ? (
           <div style={{ marginTop: 10 }}>
-            Loading geometry... <span className="fa fa-refresh fa-spin" />
+            Loading geometry... <span className='fa fa-refresh fa-spin' />
           </div>
         ) : null}
         {!loading && error !== null ? <div>{error}</div> : null}
