@@ -339,5 +339,10 @@
             <artifactId>org.apache.servicemix.bundles.jaxb-runtime</artifactId>
             <version>${servicemix.bundles.jaxb.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.aries.spifly</groupId>
+            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+            <version>${spifly.version}</version>
+        </dependency>
     </dependencies>
 </project>
